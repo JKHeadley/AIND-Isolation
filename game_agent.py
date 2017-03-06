@@ -7,6 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 import random
+import math
 
 
 class Timeout(Exception):
@@ -118,7 +119,7 @@ class CustomPlayer:
 
         self.time_left = time_left
 
-        # TODO: finish this function!
+        value = {}
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -129,16 +130,20 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            pass
+            moves = dict()
+            for move in legal_moves:
+                moves[move], _ = self.minimax(game, 1)
+
+            value = max(moves, key=moves.get)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-        raise NotImplementedError
+        return value
 
-    def minimax(self, game, depth, maximizing_player=True):
+    def minimax(self, game, max_depth, maximizing_player=True, current_depth=1):
         """Implement the minimax search algorithm as described in the lectures.
 
         Parameters
@@ -172,10 +177,29 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if current_depth > max_depth:
+            return self.score(game, self), game.get_player_location(self)
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
+        moves = dict()
+
+        if maximizing_player:
+            for move in game.get_legal_moves():
+                new_game = game.forecast_move(move)
+                moves[move], _ = self.minimax(new_game, max_depth, False, current_depth + 1)
+
+            value = max(moves, key=moves.get)
+            return moves[value], value
+        else:
+            for move in game.get_legal_moves():
+                new_game = game.forecast_move(move)
+                moves[move], _ = self.minimax(new_game, max_depth, True, current_depth + 1)
+
+            value = min(moves, key=moves.get)
+            return moves[value], value
+
+
+
+    def alphabeta(self, game, max_depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, current_depth=1):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -216,5 +240,22 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        # TODO: finish this function!
-        raise NotImplementedError
+        if current_depth > max_depth:
+            return self.score(game, self), game.get_player_location(self)
+
+        moves = dict()
+
+        if maximizing_player:
+            for move in game.get_legal_moves():
+                new_game = game.forecast_move(move)
+                moves[move], _ = self.minimax(new_game, max_depth, False, current_depth + 1)
+
+            value = max(moves, key=moves.get)
+            return moves[value], value
+        else:
+            for move in game.get_legal_moves():
+                new_game = game.forecast_move(move)
+                moves[move], _ = self.minimax(new_game, max_depth, True, current_depth + 1)
+
+            value = min(moves, key=moves.get)
+            return moves[value], value
