@@ -422,7 +422,7 @@ class Project1Test(unittest.TestCase):
             self.assertIn(move, expected_moves[idx // 2], WRONG_MOVE.format(
                 method, test_depth, expected_moves[idx // 2], move))
 
-    #@timeout(20)
+    @timeout(20)
     # @unittest.skip("Skip alpha-beta test.")  # Uncomment this line to skip test
     def test_alphabeta(self):
         """ Test CustomPlayer.alphabeta
@@ -500,8 +500,8 @@ class Project1Test(unittest.TestCase):
                 self.start_time = curr_time_millis()
 
             def time_left(self):
-                return 1e10 - (curr_time_millis() - self.start_time)
-                # return self.time_limit - (curr_time_millis() - self.start_time)
+                # return 1e10 - (curr_time_millis() - self.start_time)
+                return self.time_limit - (curr_time_millis() - self.start_time)
 
         w, h = 11, 11  # board size
         adversary_location = (0, 0)
@@ -519,7 +519,7 @@ class Project1Test(unittest.TestCase):
             # set the initial timer high enough that the search will not
             # timeout before triggering the dynamic timer to halt by visiting
             # the expected number of nodes
-            time_limit = 1e4
+            time_limit = 1e10
             timer = DynamicTimer(time_limit)
             eval_fn = makeEvalStop(exact_counts[idx][0], timer, time_limit)
             agentUT, board = self.initAUT(-1, eval_fn, True, method,

@@ -8,6 +8,7 @@ relative strength using tournament.py and include the results in your report.
 """
 import random
 import math
+import sys
 
 
 class Timeout(Exception):
@@ -38,8 +39,15 @@ def custom_score(game, player):
         The heuristic value of the current game state to the specified player.
     """
 
-    # TODO: finish this function!
-    raise NotImplementedError
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
 
 
 class CustomPlayer:
@@ -130,11 +138,29 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            moves = dict()
-            for move in legal_moves:
-                moves[move], _ = self.minimax(game, 1)
-
-            value = max(moves, key=moves.get)
+            if self.iterative:
+                for depth in range(1, sys.maxsize):
+                    _, value = getattr(self, self.method)(game, depth)
+                    # moves = dict()
+                    # for move in legal_moves:
+                    #     new_game = game.forecast_move(move)
+                    #     moves[move], _ = getattr(self, self.method)(new_game, depth - 1, False)
+                    #
+                    #     if len(moves) > 0:
+                    #         value = max(moves, key=moves.get)
+                    #     else:
+                    #         value = (-1, -1)
+            else:
+                _, value = getattr(self, self.method)(game, self.search_depth)
+                # moves = dict()
+                # for move in legal_moves:
+                #     new_game = game.forecast_move(move)
+                #     moves[move], _ = getattr(self, self.method)(new_game, self.search_depth - 1, False)
+                #
+                #     if len(moves) > 0:
+                #         value = max(moves, key=moves.get)
+                #     else:
+                #         value = (-1, -1)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -143,7 +169,7 @@ class CustomPlayer:
         # Return the best move from the last completed search iteration
         return value
 
-    def minimax(self, game, max_depth, maximizing_player=True, current_depth=1):
+    def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
 
         Parameters
@@ -177,7 +203,7 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        if current_depth > max_depth:
+        if depth == 0:
             return self.score(game, self), game.get_player_location(self)
 
         moves = dict()
@@ -185,21 +211,32 @@ class CustomPlayer:
         if maximizing_player:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                moves[move], _ = self.minimax(new_game, max_depth, False, current_depth + 1)
+                # print(new_game.to_string())
+                # print(new_game.visited)
+                # print(new_game.counter)
+                moves[move], _ = self.minimax(new_game, depth - 1, False)
 
-            value = max(moves, key=moves.get)
-            return moves[value], value
+            if len(moves) > 0:
+                value = max(moves, key=moves.get)
+                return moves[value], value
+            else:
+                return float("-inf"), (-1, -1)
         else:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                moves[move], _ = self.minimax(new_game, max_depth, True, current_depth + 1)
+                # print(new_game.to_string())
+                # print(new_game.visited)
+                # print(new_game.counter)
+                moves[move], _ = self.minimax(new_game, depth - 1, True)
 
-            value = min(moves, key=moves.get)
-            return moves[value], value
+            if len(moves) > 0:
+                value = min(moves, key=moves.get)
+                return moves[value], value
+            else:
+                return float("-inf"), (-1, -1)
 
 
-
-    def alphabeta(self, game, max_depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, current_depth=1):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -240,7 +277,7 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        if current_depth > max_depth:
+        if depth == 0:
             return self.score(game, self), game.get_player_location(self)
 
         moves = dict()
@@ -248,14 +285,28 @@ class CustomPlayer:
         if maximizing_player:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                moves[move], _ = self.minimax(new_game, max_depth, False, current_depth + 1)
+                v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, False)
+                moves[move] = v
+                if v >= beta:
+                    return v, move
+                alpha = max([alpha, v])
 
-            value = max(moves, key=moves.get)
-            return moves[value], value
+            if len(moves) > 0:
+                value = max(moves, key=moves.get)
+                return moves[value], value
+            else:
+                return float("-inf"), (-1, -1)
         else:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                moves[move], _ = self.minimax(new_game, max_depth, True, current_depth + 1)
+                v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, True)
+                moves[move] = v
+                if v <= alpha:
+                    return v, move
+                beta = min([beta, v])
 
-            value = min(moves, key=moves.get)
-            return moves[value], value
+            if len(moves) > 0:
+                value = min(moves, key=moves.get)
+                return moves[value], value
+            else:
+                return float("-inf"), (-1, -1)
