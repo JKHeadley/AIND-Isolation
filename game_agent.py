@@ -141,26 +141,8 @@ class CustomPlayer:
             if self.iterative:
                 for depth in range(1, sys.maxsize):
                     _, value = getattr(self, self.method)(game, depth)
-                    # moves = dict()
-                    # for move in legal_moves:
-                    #     new_game = game.forecast_move(move)
-                    #     moves[move], _ = getattr(self, self.method)(new_game, depth - 1, False)
-                    #
-                    #     if len(moves) > 0:
-                    #         value = max(moves, key=moves.get)
-                    #     else:
-                    #         value = (-1, -1)
             else:
                 _, value = getattr(self, self.method)(game, self.search_depth)
-                # moves = dict()
-                # for move in legal_moves:
-                #     new_game = game.forecast_move(move)
-                #     moves[move], _ = getattr(self, self.method)(new_game, self.search_depth - 1, False)
-                #
-                #     if len(moves) > 0:
-                #         value = max(moves, key=moves.get)
-                #     else:
-                #         value = (-1, -1)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
@@ -234,7 +216,6 @@ class CustomPlayer:
                 return moves[value], value
             else:
                 return float("-inf"), (-1, -1)
-
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
