@@ -101,6 +101,7 @@ class RandomPlayer():
 
     def __init__(self):
         self.iterative = False
+        self.isOpponent = True
 
     def get_move(self, game, legal_moves, time_left):
         """Randomly select a move from the available legal moves.
