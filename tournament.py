@@ -33,7 +33,7 @@ from sample_players import improved_score
 from game_agent import CustomPlayer
 from game_agent import custom_score
 
-NUM_MATCHES = 5  # number of matches against each opponent
+NUM_MATCHES = 3  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -80,6 +80,18 @@ def play_match(player1, player2):
         winner, _, termination = game.play(time_limit=TIME_LIMIT)
 
         if player1 == winner:
+            if game == games[0]:
+                if player1.iterative:
+                    print("WINNER: ", "PLAYER 1: STUDENT")
+                else:
+                    print("WINNER: ", "PLAYER 1: OPPONENT")
+            else:
+                if player1.iterative:
+                    print("WINNER: ", "PLAYER 2: STUDENT")
+                else:
+                    print("WINNER: ", "PLAYER 2: OPPONENT")
+
+
             num_wins[player1] += 1
 
             if termination == "timeout":
@@ -88,6 +100,16 @@ def play_match(player1, player2):
                 num_invalid_moves[player2] += 1
 
         elif player2 == winner:
+            if game == games[0]:
+                if player2.iterative:
+                    print("WINNER: ", "PLAYER 2: STUDENT")
+                else:
+                    print("WINNER: ", "PLAYER 2: OPPONENT")
+            else:
+                if player2.iterative:
+                    print("WINNER: ", "PLAYER 1: STUDENT")
+                else:
+                    print("WINNER: ", "PLAYER 1: OPPONENT")
 
             num_wins[player2] += 1
 
@@ -95,6 +117,8 @@ def play_match(player1, player2):
                 num_timeouts[player1] += 1
             else:
                 num_invalid_moves[player1] += 1
+
+        print(game.to_string())
 
     if sum(num_timeouts.values()) != 0:
         warnings.warn(TIMEOUT_WARNING)
@@ -129,6 +153,7 @@ def play_round(agents, num_matches):
 
         wins += counts[agent_1.player]
 
+        print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
         print("\tResult: {} to {}".format(int(counts[agent_1.player]),
                                           int(counts[agent_2.player])))
 
@@ -140,6 +165,7 @@ def main():
     HEURISTICS = [("Null", null_score),
                   ("Open", open_move_score),
                   ("Improved", improved_score)]
+    # HEURISTICS = [("Null", null_score)]
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
@@ -160,8 +186,11 @@ def main():
     # systems; i.e., the performance of the student agent is considered
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
-    test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+
+    # test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
+    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
 
     print(DESCRIPTION)
     for agentUT in test_agents:
@@ -170,7 +199,9 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents = random_agents + mm_agents + ab_agents + [agentUT]
+        # agents = random_agents + mm_agents + ab_agents + [agentUT]
+        agents = random_agents + mm_agents + [agentUT]
+        # agents = mm_agents + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
         print("\n\nResults:")

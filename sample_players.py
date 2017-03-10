@@ -99,6 +99,9 @@ def improved_score(game, player):
 class RandomPlayer():
     """Player that chooses a move randomly."""
 
+    def __init__(self):
+        self.iterative = False
+
     def get_move(self, game, legal_moves, time_left):
         """Randomly select a move from the available legal moves.
 

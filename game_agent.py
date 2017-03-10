@@ -128,6 +128,8 @@ class CustomPlayer:
         self.time_left = time_left
 
         value = {}
+        move = {}
+        last_depth = {}
 
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
@@ -140,18 +142,31 @@ class CustomPlayer:
             # when the timer gets close to expiring
             if self.iterative:
                 for depth in range(1, sys.maxsize):
-                    _, value = getattr(self, self.method)(game, depth)
+                    last_depth = depth
+                    value, move = getattr(self, self.method)(game, depth)
+                    if value == float("-inf") and depth > 50:
+                        break
+                    if value == float("inf"):
+                        break
             else:
-                _, value = getattr(self, self.method)(game, self.search_depth)
+                value, move = getattr(self, self.method)(game, self.search_depth)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-        return value
+        if self.iterative:
+        #     print("STUDENT MOVE", move)
+        #     print("STUDENT VALUE", value)
+            print("STUDENT DEPTH", last_depth)
+        # else:
+        #     print("OPPONENT MOVE", move)
+        #     print("OPPONENT VALUE", value)
+        #     print("OPPONENT DEPTH", last_depth)
+        return move
 
-    def minimax(self, game, depth, maximizing_player=True):
+    def minimax(self, game, depth, maximizing_player=True, first=True):
         """Implement the minimax search algorithm as described in the lectures.
 
         Parameters
@@ -186,36 +201,51 @@ class CustomPlayer:
             raise Timeout()
 
         if depth == 0:
-            return self.score(game, self), game.get_player_location(self)
+            value = self.score(game, self), game.get_player_location(game.active_player)
+            # if game.active_player.iterative:
+            #     print("END VALUE OPPONENT: ", value)
+            # else:
+            #     print("END VALUE STUDENT: ", value)
+            return value
 
         moves = dict()
 
         if maximizing_player:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                # print(new_game.to_string())
                 # print(new_game.visited)
                 # print(new_game.counter)
-                moves[move], _ = self.minimax(new_game, depth - 1, False)
+                moves[move], _ = self.minimax(new_game, depth - 1, False, False)
+                # if first:
+                #     print(new_game.to_string())
+                #     print(depth, move, moves[move])
 
             if len(moves) > 0:
                 value = max(moves, key=moves.get)
+                # if first:
+                #     print(moves)
+                #     print(value)
                 return moves[value], value
             else:
                 return float("-inf"), (-1, -1)
         else:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                # print(new_game.to_string())
                 # print(new_game.visited)
                 # print(new_game.counter)
-                moves[move], _ = self.minimax(new_game, depth - 1, True)
+                moves[move], _ = self.minimax(new_game, depth - 1, True, False)
+                # if first:
+                #     print(new_game.to_string())
+                #     print(depth, move, moves[move])
 
             if len(moves) > 0:
                 value = min(moves, key=moves.get)
+                # if first:
+                #     print(moves)
+                #     print(value)
                 return moves[value], value
             else:
-                return float("-inf"), (-1, -1)
+                return float("inf"), (-1, -1)
 
     def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True):
         """Implement minimax search with alpha-beta pruning as described in the
@@ -259,7 +289,7 @@ class CustomPlayer:
             raise Timeout()
 
         if depth == 0:
-            return self.score(game, self), game.get_player_location(self)
+            return self.score(game, self), game.get_player_location(game.active_player)
 
         moves = dict()
 
@@ -290,4 +320,4 @@ class CustomPlayer:
                 value = min(moves, key=moves.get)
                 return moves[value], value
             else:
-                return float("-inf"), (-1, -1)
+                return float("inf"), (-1, -1)
