@@ -54,6 +54,12 @@ class Board(object):
         self.__last_player_move__ = {player_1: Board.NOT_MOVED, player_2: Board.NOT_MOVED}
         self.__player_symbols__ = {Board.BLANK: Board.BLANK, player_1: 1, player_2: 2}
 
+        self.__show_moves__ = False
+
+    def show_moves(self):
+        self.__show_moves__ = True
+        return
+
     @property
     def active_player(self):
         """
@@ -101,6 +107,7 @@ class Board(object):
         new_board.__last_player_move__ = copy(self.__last_player_move__)
         new_board.__player_symbols__ = copy(self.__player_symbols__)
         new_board.__board_state__ = deepcopy(self.__board_state__)
+        new_board.__show_moves__ = deepcopy(self.__show_moves__)
         return new_board
 
     def forecast_move(self, move):
@@ -331,6 +338,8 @@ class Board(object):
             move_start = curr_time_millis()
             time_left = lambda : time_limit - (curr_time_millis() - move_start)
             curr_move = self.active_player.get_move(game_copy, legal_player_moves, time_left)
+            # if (self.active_player.name == "Student"):
+            #     print("CURRENT MOVE:", curr_move)
             move_end = time_left()
 
             # print(move_end)
@@ -350,11 +359,16 @@ class Board(object):
             if move_end < 0:
                 # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
                 # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
+                print("TIMEOUT:", move_end)
                 return self.__inactive_player__, move_history, "timeout"
 
             if curr_move not in legal_player_moves:
                 # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
                 # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
+                # print("ILLEGAL:", curr_move, legal_player_moves)
                 return self.__inactive_player__, move_history, "illegal move"
 
             self.apply_move(curr_move)
+
+            if self.__show_moves__:
+                print(self.to_string())

@@ -7,6 +7,10 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 
+from random import randint
+import numpy
+
+
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
@@ -44,8 +48,78 @@ def custom_score(game, player):
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(own_moves - opp_moves)
-    # own_moves = len(game.get_legal_moves(player))
-    # return float(own_moves)
+
+
+def custom_score2(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    a = numpy.array(game.get_player_location(player))
+    b = numpy.array(game.get_player_location(game.get_opponent(player)))
+    c = numpy.array((3, 3))
+    my_dist = -1 * numpy.linalg.norm(a - c)
+    opp_dist = numpy.linalg.norm(b - c)
+    return float(my_dist + opp_dist)
+
+
+def custom_score3(game, player):
+    """Calculate the heuristic value of a game state from the point of view
+    of the given player.
+
+    Note: this function should be called from within a Player instance as
+    `self.score()` -- you should not need to call this function directly.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    a = numpy.array(game.get_player_location(player))
+    b = numpy.array((3, 3))
+    dist = -1 * numpy.linalg.norm(a - b)
+    return float(dist)
 
 
 class CustomPlayer:
@@ -90,10 +164,70 @@ class CustomPlayer:
         self.ab_trees = dict()
         self.move_count = 0
         self.name = name
+        self.reflect = False
+        self.center = ()
+        self.last_opponent_location = ()
 
         self.depth_at_move = dict()
 
         self.branching_factor = dict()
+
+    def get_best_second_move(self, game):
+        move = tuple(map(lambda x, y: x - y, self.center, (0, 1)))
+        return move
+
+    def get_reflect_move(self, game):
+        if game.get_player_location(self) == self.center:
+            translation = tuple(map(lambda x, y: x - y, game.get_player_location(game.get_opponent(self)), self.center))
+            move = tuple(map(lambda x, y: x - y, self.center, translation))
+        else:
+            translation = tuple(map(lambda x, y: x - y, self.last_opponent_location, game.get_player_location(game.get_opponent(self))))
+            move = tuple(map(lambda x, y: x + y, game.get_player_location(self), translation))
+
+        self.last_opponent_location = game.get_player_location(game.get_opponent(self))
+        return move
+
+    def can_reflect(self, game):
+        if game.get_player_location(self) == self.center:
+            reflect_moves = {
+                tuple(map(sum, zip(self.center, (-2, -1)))),
+                tuple(map(sum, zip(self.center, (-2, 1)))),
+                tuple(map(sum, zip(self.center, (-1, -2)))),
+                tuple(map(sum, zip(self.center, (-1, 2)))),
+                tuple(map(sum, zip(self.center, (1, -2)))),
+                tuple(map(sum, zip(self.center, (1, 2)))),
+                tuple(map(sum, zip(self.center, (2, -1)))),
+                tuple(map(sum, zip(self.center, (2, 1))))
+            }
+            if game.get_player_location(game.get_opponent(self)) in reflect_moves:
+                self.reflect = True
+                return True
+
+        return False
+
+    def get_opening_move(self, game):
+        move = (-1, -1)
+        self.center = (int(game.width / 2), int(game.height / 2))
+        if game.move_count == 0:
+            move = self.center
+        elif game.move_count == 1:
+            if game.move_is_legal(self.center):
+                move = self.center
+            else:
+                move = self.get_best_second_move(game)
+        elif game.move_count == 2:
+            if self.can_reflect(game):
+                move = self.get_reflect_move(game)
+        elif game.move_count == 3:
+            if self.can_reflect(game):
+                # print("WATCH OUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                game.show_moves()
+                move = self.get_reflect_move(game)
+
+        if move in game.get_legal_moves(self):
+            return move
+        else:
+            return None
 
     def get_move(self, game, legal_moves, time_left):
         """Search for the best move from the available legal moves and return a
@@ -135,7 +269,8 @@ class CustomPlayer:
 
         value = {}
         move = {}
-        last_depth = {}
+        last_depth = False
+        lookout = False
 
         self.ab_trees = dict()
 
@@ -143,21 +278,25 @@ class CustomPlayer:
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
 
+        game.show_moves()
         try:
             # The search method call (alpha beta or minimax) should happen in
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            if self.iterative:
-                # board_size = game.width * game.height
-                # Avg number of moves taken before branching factor reduces (need to actually check branching factor).
-                # For a 7 X 7 board, this is about 18 moves
-                # We want to set a start depth to get a head start on searching
-                # threshold = board_size * 0.36
-                # if game.move_count > threshold:
-                #     start_depth = 6
-                # else:
-                #     start_depth = 3
+            if game.move_count < 4:
+                move = self.get_opening_move(game)
+                if not move:
+                    move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
+            elif self.reflect:
+                move = self.get_reflect_move(game)
+                # print("REFLECTING", move, game.get_legal_moves(), game.move_is_legal(move))
+                if not move in game.get_legal_moves(self) and len(game.get_legal_moves()) > 0:
+                    self.reflect = False
+                    move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
+                    # print("REFLECTION FAILED:", move)
+
+            elif self.iterative:
                 for depth in range(1, 50):
                     last_depth = depth
                     value, move = getattr(self, self.method)(game, depth)
@@ -182,7 +321,8 @@ class CustomPlayer:
         #     print("OPPONENT MOVE", move)
         #     print("OPPONENT VALUE", value)
         #     print("OPPONENT DEPTH", last_depth)
-        if self.iterative:
+        # print("STUDENT MOVE", move, value)
+        if self.iterative and last_depth:
             self.depth_at_move[game.move_count] = last_depth
 
         self.move_count += 1
@@ -332,6 +472,8 @@ class CustomPlayer:
                 new_game = game.forecast_move(move)
                 v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, False)
                 moves[move] = v
+                # print(new_game.to_string())
+                # print(depth, move, moves[move])
                 if v >= beta:
                     return v, move
                 alpha = max([alpha, v])
@@ -349,6 +491,8 @@ class CustomPlayer:
                 new_game = game.forecast_move(move)
                 v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, True)
                 moves[move] = v
+                # print(new_game.to_string())
+                # print(depth, move, moves[move])
                 if v <= alpha:
                     return v, move
                 beta = min([beta, v])
@@ -458,6 +602,12 @@ class CustomPlayerOpponent:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
+
+            if game.move_count == 0:
+                return legal_moves[randint(0, len(legal_moves) - 1)]
+            elif game.move_count == 1:
+                return legal_moves[randint(0, len(legal_moves) - 1)]
+
             if self.iterative:
                 for depth in range(1, 100):
                     last_depth = depth

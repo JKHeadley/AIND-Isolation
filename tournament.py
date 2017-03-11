@@ -34,8 +34,10 @@ from sample_players import improved_score
 from game_agent import CustomPlayer
 from game_agent import CustomPlayerOpponent
 from game_agent import custom_score
+from game_agent import custom_score2
+from game_agent import custom_score3
 
-NUM_MATCHES = 1  # number of matches against each opponent
+NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -78,12 +80,13 @@ def play_match(player1, player2):
     num_timeouts = {player1: 0, player2: 0}
     num_invalid_moves = {player1: 0, player2: 0}
     games = [Board(player1, player2), Board(player2, player1)]
+    # games = [Board(player2, player1), Board(player2, player1)]
 
     # initialize both games with a random move and response
-    for _ in range(2):
-        move = random.choice(games[0].get_legal_moves())
-        games[0].apply_move(move)
-        games[1].apply_move(move)
+    # for _ in range(1):
+    #     move = random.choice(games[0].get_legal_moves())
+        # games[0].apply_move(move)
+        # games[1].apply_move(move)
 
     # play both games and tally the results
     for game in games:
@@ -105,6 +108,7 @@ def play_match(player1, player2):
             num_wins[player1] += 1
 
             if termination == "timeout":
+                print("TIMEOUT")
                 num_timeouts[player2] += 1
             else:
                 num_invalid_moves[player2] += 1
@@ -124,6 +128,7 @@ def play_match(player1, player2):
             num_wins[player2] += 1
 
             if termination == "timeout":
+                print("TIMEOUT:")
                 num_timeouts[player1] += 1
             else:
                 num_invalid_moves[player1] += 1
@@ -170,6 +175,9 @@ def play_match(player1, player2):
             avg_depth_at_move[player2.name] = player2.depth_at_move
 
         # print(game.to_string())
+        # print("WINNER: ", winner.name)
+        # if winner.name != "Student":
+        #     print(game.to_string())
 
     if sum(num_timeouts.values()) != 0:
         warnings.warn(TIMEOUT_WARNING)
@@ -227,8 +235,8 @@ def main():
                   ("Open", open_move_score),
                   ("Improved", improved_score)]
     # HEURISTICS = [("Null", null_score)]
-    AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
+    AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
 
     # Create a collection of CPU agents using fixed-depth minimax or alpha beta
@@ -249,9 +257,16 @@ def main():
     # faster or slower computers.
 
     test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
+                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    "),
+                   Agent(CustomPlayer(score_fn=custom_score2, **CUSTOM_ARGS, name="Student2"), "Student2   "),
+                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
-    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student    ")]
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
+
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
+
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student2"), "Student2   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
@@ -263,10 +278,11 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        # agents = random_agents + mm_agents + ab_agents + [agentUT]
+        agents = random_agents + mm_agents + ab_agents + [agentUT]
         # agents = random_agents + mm_agents + [agentUT]
+        # agents = random_agents + [agentUT]
         # agents = mm_agents + [agentUT]
-        agents = ab_agents + [agentUT]
+        # agents = ab_agents + [agentUT]
         # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 

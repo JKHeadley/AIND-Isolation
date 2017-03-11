@@ -130,6 +130,11 @@ class RandomPlayer():
             A randomly selected legal move; may return (-1, -1) if there are
             no available legal moves.
         """
+        # if game.move_count == 0:
+        #     return (3,3)
+        # elif game.move_count == 1:
+        #     if game.move_is_legal((1,4)):
+        #         return (1,4)
 
         if not legal_moves:
             return (-1, -1)
