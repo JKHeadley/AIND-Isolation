@@ -45,6 +45,7 @@ class Board(object):
         self.width = width
         self.height = height
         self.move_count = 0
+        self.time_left = dict()
         self.__player_1__ = player_1
         self.__player_2__ = player_2
         self.__active_player__ = player_1
@@ -333,6 +334,10 @@ class Board(object):
             move_end = time_left()
 
             # print(move_end)
+            if self.active_player in self.time_left:
+                self.time_left[self.active_player] = self.time_left[self.active_player] + 150 - move_end
+            else:
+                self.time_left[self.active_player] = 150 - move_end
 
             if curr_move is None:
                 curr_move = Board.NOT_MOVED
@@ -343,9 +348,13 @@ class Board(object):
                 move_history[-1].append(curr_move)
 
             if move_end < 0:
+                # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
+                # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
                 return self.__inactive_player__, move_history, "timeout"
 
             if curr_move not in legal_player_moves:
+                # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
+                # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
                 return self.__inactive_player__, move_history, "illegal move"
 
             self.apply_move(curr_move)

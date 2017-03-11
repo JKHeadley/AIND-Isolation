@@ -6,10 +6,6 @@ augment the test suite with your own test cases to further test your code.
 You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
-import random
-import math
-import sys
-
 
 class Timeout(Exception):
     """Subclass base exception for code clarity."""
@@ -48,6 +44,8 @@ def custom_score(game, player):
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(own_moves - opp_moves)
+    # own_moves = len(game.get_legal_moves(player))
+    # return float(own_moves)
 
 
 class CustomPlayer:
@@ -90,6 +88,9 @@ class CustomPlayer:
         self.TIMER_THRESHOLD = timeout
         self.isOpponent = False
         self.ab_trees = dict()
+        self.move_count = 0
+
+        self.depth_at_move = dict()
 
         self.branching_factor = dict()
 
@@ -135,6 +136,8 @@ class CustomPlayer:
         move = {}
         last_depth = {}
 
+        self.ab_trees = dict()
+
         # Perform any required initializations, including selecting an initial
         # move from the game board (i.e., an opening book), or returning
         # immediately if there are no legal moves
@@ -145,20 +148,20 @@ class CustomPlayer:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
             if self.iterative:
-                board_size = game.width * game.height
+                # board_size = game.width * game.height
                 # Avg number of moves taken before branching factor reduces (need to actually check branching factor).
                 # For a 7 X 7 board, this is about 18 moves
                 # We want to set a start depth to get a head start on searching
-                threshold = board_size * 0.36
-                if game.move_count > threshold:
-                    start_depth = 6
-                else:
-                    start_depth = 3
-                for depth in range(start_depth, sys.maxsize):
+                # threshold = board_size * 0.36
+                # if game.move_count > threshold:
+                #     start_depth = 6
+                # else:
+                #     start_depth = 3
+                for depth in range(1, 50):
                     last_depth = depth
                     value, move = getattr(self, self.method)(game, depth)
                     # The following if statements end iterative deepening early based on the prediction of a win or loss
-                    if value == float("-inf") and depth > 50:
+                    if value == float("-inf") and depth > 40:
                         break
                     if value == float("inf"):
                         break
@@ -170,15 +173,18 @@ class CustomPlayer:
             pass
 
         # Return the best move from the last completed search iteration
-        if self.iterative and last_depth > 7:
+        # if self.iterative and last_depth > 7:
         #     print("STUDENT MOVE", move)
         #     print("STUDENT VALUE", value)
-            print("STUDENT DEPTH", last_depth)
-            print("GAME MOVES", game.move_count)
+        #     print("STUDENT MOVES", game.move_count)
         # else:
         #     print("OPPONENT MOVE", move)
         #     print("OPPONENT VALUE", value)
         #     print("OPPONENT DEPTH", last_depth)
+        if self.iterative:
+            self.depth_at_move[game.move_count] = last_depth
+
+        self.move_count += 1
         return move
 
     def minimax(self, game, depth, maximizing_player=True, first=True):
@@ -303,14 +309,17 @@ class CustomPlayer:
         if self.time_left() < self.TIMER_THRESHOLD:
             raise Timeout()
 
-        current_location = game.get_player_location(game.active_player);
+        current_location = game.get_player_location(game.active_player)
 
         if depth == 0:
             return self.score(game, self), current_location
 
         moves = dict()
 
-        legal_moves = game.get_legal_moves()
+        if current_location in self.ab_trees:
+            legal_moves = (k[0] for k in self.ab_trees[current_location])
+        else:
+            legal_moves = game.get_legal_moves()
         # The code below is used to calculate the average branching factor for each move count
         # if game.move_count in self.branching_factor:
         #     self.branching_factor[game.move_count] = (self.branching_factor[game.move_count] + len(legal_moves)) / 2
@@ -326,6 +335,9 @@ class CustomPlayer:
                     return v, move
                 alpha = max([alpha, v])
 
+            self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
+                                                     reverse=True)
+
             if len(moves) > 0:
                 value = max(moves, key=moves.get)
                 return moves[value], value
@@ -340,11 +352,15 @@ class CustomPlayer:
                     return v, move
                 beta = min([beta, v])
 
+            self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
+                                                     reverse=False)
+
             if len(moves) > 0:
                 value = min(moves, key=moves.get)
                 return moves[value], value
             else:
                 return float("inf"), (-1, -1)
+
 
 class CustomPlayerOpponent:
     """Game-playing agent that chooses a move using your evaluation function
@@ -385,6 +401,9 @@ class CustomPlayerOpponent:
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
         self.isOpponent = True
+        self.move_count = 0
+
+        self.depth_at_move = dict()
 
     def get_move(self, game, legal_moves, time_left):
         """Search for the best move from the available legal moves and return a
@@ -438,7 +457,7 @@ class CustomPlayerOpponent:
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
             if self.iterative:
-                for depth in range(1, sys.maxsize):
+                for depth in range(1, 100):
                     last_depth = depth
                     value, move = getattr(self, self.method)(game, depth)
                     if value == float("-inf") and depth > 50:
@@ -453,15 +472,19 @@ class CustomPlayerOpponent:
             pass
 
         # Return the best move from the last completed search iteration
-        if self.iterative and last_depth > 7:
+        # if self.iterative and last_depth > 7:
         #     print("STUDENT MOVE", move)
         #     print("STUDENT VALUE", value)
-            print("OPPONENT DEPTH", last_depth)
-            print("GAME MOVES", game.move_count)
+        #     print("OPPONENT DEPTH", last_depth)
+        #     print("GAME MOVES", game.move_count)
         # else:
         #     print("OPPONENT MOVE", move)
         #     print("OPPONENT VALUE", value)
         #     print("OPPONENT DEPTH", last_depth)
+        if self.iterative:
+            self.depth_at_move[game.move_count] = last_depth
+
+        self.move_count += 1
         return move
 
     def minimax(self, game, depth, maximizing_player=True, first=True):
