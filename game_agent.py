@@ -79,7 +79,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+                 iterative=True, method='minimax', timeout=10., name=""):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -89,6 +89,7 @@ class CustomPlayer:
         self.isOpponent = False
         self.ab_trees = dict()
         self.move_count = 0
+        self.name = name
 
         self.depth_at_move = dict()
 
@@ -393,7 +394,7 @@ class CustomPlayerOpponent:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10.):
+                 iterative=True, method='minimax', timeout=10., name=""):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -402,6 +403,7 @@ class CustomPlayerOpponent:
         self.TIMER_THRESHOLD = timeout
         self.isOpponent = True
         self.move_count = 0
+        self.name = name
 
         self.depth_at_move = dict()
 

@@ -35,7 +35,7 @@ from game_agent import CustomPlayer
 from game_agent import CustomPlayerOpponent
 from game_agent import custom_score
 
-NUM_MATCHES = 5  # number of matches against each opponent
+NUM_MATCHES = 1  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -60,7 +60,7 @@ Agent = namedtuple("Agent", ["player", "name"])
 
 first = True
 branching_factor = dict()
-match_count = 0
+match_count = dict()
 avg_depth_at_move = dict()
 avg_time = dict()
 
@@ -139,7 +139,15 @@ def play_match(player1, player2):
 
         # print(branching_factor)
 
-        match_count += 1
+        if player1.name in match_count:
+            match_count[player1.name] += 1
+        else:
+            match_count[player1.name] = 1
+
+        if player2.name in match_count:
+            match_count[player2.name] += 1
+        else:
+            match_count[player2.name] = 1
 
         # if player1 in avg_time:
         #     avg_time[player1] = game.time_left[player1] + avg_time[player1]
@@ -151,15 +159,15 @@ def play_match(player1, player2):
         # else:
         #     avg_time[player2] = game.time_left[player2]
 
-        if player1 in avg_depth_at_move:
-            avg_depth_at_move[player1] = {k: player1.depth_at_move.get(k, 0) + avg_depth_at_move[player1].get(k, 0) for k in set(player1.depth_at_move) | set(avg_depth_at_move[player1])}
+        if player1.name in avg_depth_at_move:
+            avg_depth_at_move[player1.name] = {k: player1.depth_at_move.get(k, 0) + avg_depth_at_move[player1.name].get(k, 0) for k in set(player1.depth_at_move) | set(avg_depth_at_move[player1.name])}
         else:
-            avg_depth_at_move[player1] = player1.depth_at_move
+            avg_depth_at_move[player1.name] = player1.depth_at_move
             
-        if player2 in avg_depth_at_move:
-            avg_depth_at_move[player2] = {k: player2.depth_at_move.get(k, 0) + avg_depth_at_move[player2].get(k, 0) for k in set(player2.depth_at_move) | set(avg_depth_at_move[player2])}
+        if player2.name in avg_depth_at_move:
+            avg_depth_at_move[player2.name] = {k: player2.depth_at_move.get(k, 0) + avg_depth_at_move[player2.name].get(k, 0) for k in set(player2.depth_at_move) | set(avg_depth_at_move[player2.name])}
         else:
-            avg_depth_at_move[player2] = player2.depth_at_move
+            avg_depth_at_move[player2.name] = player2.depth_at_move
 
         # print(game.to_string())
 
@@ -169,7 +177,7 @@ def play_match(player1, player2):
     return num_wins[player1], num_wins[player2]
 
 
-@do_profile(follow=[CustomPlayer.alphabeta, CustomPlayerOpponent.alphabeta])
+# @do_profile(follow=[CustomPlayer.alphabeta, CustomPlayerOpponent.alphabeta])
 def play_round(agents, num_matches):
     """
     Play one round (i.e., a single match between each pair of opponents)
@@ -228,9 +236,9 @@ def main():
     # (MM=minimax, AB=alpha-beta) and the heuristic function (Null=null_score,
     # Open=open_move_score, Improved=improved_score). For example, MM_Open is
     # an agent using minimax search with the open moves heuristic.
-    mm_agents = [Agent(CustomPlayerOpponent(score_fn=h, **MM_ARGS),
+    mm_agents = [Agent(CustomPlayerOpponent(score_fn=h, **MM_ARGS, name="MM_" + name),
                        "MM_" + name) for name, h in HEURISTICS]
-    ab_agents = [Agent(CustomPlayerOpponent(score_fn=h, **AB_ARGS),
+    ab_agents = [Agent(CustomPlayerOpponent(score_fn=h, **AB_ARGS, name="AB_" + name),
                        "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
 
@@ -240,10 +248,12 @@ def main():
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
-    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student    ")]
+    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
 
-    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student")]
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS), "Student    ")]
+
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
 
     print(DESCRIPTION)
@@ -253,9 +263,10 @@ def main():
         print("{:^25}".format("Evaluating: " + agentUT.name))
         print("*************************")
 
-        agents = random_agents + mm_agents + ab_agents + [agentUT]
+        # agents = random_agents + mm_agents + ab_agents + [agentUT]
         # agents = random_agents + mm_agents + [agentUT]
         # agents = mm_agents + [agentUT]
+        agents = ab_agents + [agentUT]
         # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
@@ -264,11 +275,11 @@ def main():
         print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
 
     for agent in test_agents:
-        avg_depth_at_move[agent.player] = {k: v / match_count / len(test_agents) for k, v in avg_depth_at_move[agent.player].items()}
-        for k, v in avg_depth_at_move[agent.player].items():
+        avg_depth_at_move[agent.player.name] = {k: v / match_count[agent.player.name] for k, v in avg_depth_at_move[agent.player.name].items()}
+        for k, v in avg_depth_at_move[agent.player.name].items():
             v = round(v, 2)
-            avg_depth_at_move[agent.player][k] = v
-        print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player])
+            avg_depth_at_move[agent.player.name][k] = v
+        print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name])
 
 if __name__ == "__main__":
     main()
