@@ -210,18 +210,15 @@ class CustomPlayer:
         self.center = (int(game.width / 2), int(game.height / 2))
         if game.move_count == 0:
             move = self.center
+            self.reflect = False
         elif game.move_count == 1:
+            self.reflect = False
             if game.move_is_legal(self.center):
                 move = self.center
             else:
                 move = self.get_best_second_move(game)
         elif game.move_count == 2:
             if self.can_reflect(game):
-                move = self.get_reflect_move(game)
-        elif game.move_count == 3:
-            if self.can_reflect(game):
-                # print("WATCH OUT!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                game.show_moves()
                 move = self.get_reflect_move(game)
 
         if move in game.get_legal_moves(self):
@@ -284,17 +281,20 @@ class CustomPlayer:
             # here in order to avoid timeout. The try/except block will
             # automatically catch the exception raised by the search method
             # when the timer gets close to expiring
-            if game.move_count < 4:
+            if game.move_count < 3:
                 move = self.get_opening_move(game)
                 if not move:
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
             elif self.reflect:
                 move = self.get_reflect_move(game)
-                # print("REFLECTING", move, game.get_legal_moves(), game.move_is_legal(move))
+                print("REFLECTING", move, game.get_legal_moves(), move in game.get_legal_moves(self))
+                new_game = game.forecast_move(move)
+                print(new_game.to_string())
                 if not move in game.get_legal_moves(self) and len(game.get_legal_moves()) > 0:
                     self.reflect = False
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
-                    # print("REFLECTION FAILED:", move)
+                    print("REFLECTION FAILED:", move, game.get_legal_moves(), move in game.get_legal_moves(self))
+                    print(game.to_string())
 
             elif self.iterative:
                 for depth in range(1, 50):

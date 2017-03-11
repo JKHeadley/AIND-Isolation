@@ -37,7 +37,7 @@ from game_agent import custom_score
 from game_agent import custom_score2
 from game_agent import custom_score3
 
-NUM_MATCHES = 100  # number of matches against each opponent
+NUM_MATCHES = 10  # number of matches against each opponent
 TIME_LIMIT = 150  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
@@ -65,6 +65,7 @@ branching_factor = dict()
 match_count = dict()
 avg_depth_at_move = dict()
 avg_time = dict()
+reflection_wins = dict()
 
 
 def play_match(player1, player2):
@@ -178,6 +179,11 @@ def play_match(player1, player2):
         # print("WINNER: ", winner.name)
         # if winner.name != "Student":
         #     print(game.to_string())
+        if winner.name == "Student" and winner.reflect:
+            if winner.name in reflection_wins:
+                reflection_wins[winner.name] += 1
+            else:
+                reflection_wins[winner.name] = 1
 
     if sum(num_timeouts.values()) != 0:
         warnings.warn(TIMEOUT_WARNING)
@@ -256,15 +262,15 @@ def main():
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
-    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    "),
-                   Agent(CustomPlayer(score_fn=custom_score2, **CUSTOM_ARGS, name="Student2"), "Student2   "),
-                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    "),
+    #                Agent(CustomPlayer(score_fn=custom_score2, **CUSTOM_ARGS, name="Student2"), "Student2   "),
+    #                Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
     #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
 
-    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
 
     # test_agents = [Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student2"), "Student2   ")]
 
@@ -296,6 +302,9 @@ def main():
             v = round(v, 2)
             avg_depth_at_move[agent.player.name][k] = v
         print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name])
+
+    for agent in test_agents:
+        print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
 
 if __name__ == "__main__":
     main()
