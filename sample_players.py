@@ -185,6 +185,14 @@ class GreedyPlayer():
 class HumanPlayer():
     """Player that chooses a move according to user's input."""
 
+
+    def __init__(self):
+        self.iterative = False
+        self.isOpponent = True
+        self.move_count = 0
+        self.depth_at_move = dict()
+        self.name = "Human"
+
     def get_move(self, game, legal_moves, time_left):
         """
         Select a move from the available legal moves based on user input at the
@@ -221,6 +229,8 @@ class HumanPlayer():
             return (-1, -1)
 
         print(('\t'.join(['[%d] %s' % (i, str(move)) for i, move in enumerate(legal_moves)])))
+
+        print(game.to_string())
 
         valid_choice = False
         while not valid_choice:

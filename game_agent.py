@@ -16,6 +16,103 @@ class Timeout(Exception):
     pass
 
 
+def check_partition(game, player):
+    """Check if a partition exists on the board. We only check for partitions
+     where two side-by-side rows or columns are completely filled. If a partition
+     exists, we conclude that the player on the side with the most open squares wins.
+
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        inf: win
+        -inf: loss
+        0: none
+    """
+
+    exists = False
+    rows = ()
+    columns = ()
+    
+    own_loc = ()
+    own_side = 0
+    
+    opp_loc = ()
+    opp_side = 0
+    
+    # First check row partitions
+
+    own_loc = game.get_player_location(player)
+    opp_loc = game.get_player_location(game.get_opponent(player))
+    for i in range(2, 4):
+        for j in range(0, 7):
+            if game.move_is_legal((i, j)) or game.move_is_legal((i+1, j)):
+                break
+            elif j == 6:
+                own_loc = game.get_player_location(player)
+                opp_loc = game.get_player_location(game.get_opponent(player))
+                # players cant be inside the partition
+                print(game.to_string())
+                if own_loc[0] != i and own_loc[0] != i + 1 and opp_loc[0] != i and opp_loc[0] != i + 1:
+                    exists = True
+                    print(game.to_string())
+        if exists:
+            rows = (i, i+1)
+            break
+        
+    # If a partition exists, see if players are on opposite sides (-1 is top, +1 is bottom)
+    if exists:
+        own_loc = game.get_player_location(player)
+        if own_loc[0] <= rows[0]:
+            own_side = -1
+        else:
+            own_side = 1
+
+        opp_loc = game.get_player_location(game.get_opponent(player))
+        if opp_loc[0] <= rows[0]:
+            opp_side = -1
+        else:
+            opp_side = 1
+
+        # If players are on opposite sides, we approximate that the winner is on the larger side
+        # NOTE: A more accurate (but more costly) estimate would be to count open moves available
+        # on each side.
+        if own_side != opp_side:
+            if rows[0] < 3 and opp_side == -1:
+                return float("inf")
+            else:
+                return float("-inf")
+
+    own_loc = game.get_player_location(player)
+    opp_loc = game.get_player_location(game.get_opponent(player))
+    for j in range(2, 4):
+        for i in range(0, 7):
+            if game.move_is_legal((i, j)) or game.move_is_legal((i, j + 1)):
+                break
+            elif i == 6:
+                own_loc = game.get_player_location(player)
+                opp_loc = game.get_player_location(game.get_opponent(player))
+                # players cant be inside the partition
+                print(game.to_string())
+                if own_loc[1] != j and own_loc[1] != j + 1 and opp_loc[1] != j and opp_loc[1] != i + j:
+                    exists = True
+                    print(game.to_string())
+        if exists:
+            columns = (j, j + 1)
+            break
+
+    return 0
+
+
 def custom_score(game, player):
     """Calculate the heuristic value of a game state from the point of view
     of the given player.
@@ -45,33 +142,53 @@ def custom_score(game, player):
     if game.is_winner(player):
         return float("inf")
 
+    # if game.move_count > 18:
+    #     partition = check_partition(game, player)
+    #     if partition == float("inf") or partition == float("-inf"):
+    #         return partition
+
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
     return float(own_moves - opp_moves)
 
 
 def custom_score2(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
-
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
     """
+    A heuristic that favors the center of the board for the player.
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    a = numpy.array(game.get_player_location(player))
+    b = numpy.array((3, 3))
+    dist = -1 * numpy.linalg.norm(a - b)
+    return float(dist)
+
+
+def custom_score3(game, player):
+    """
+    A heuristic that favors the center of the board for the player and the edges of the
+    board for the opponent.
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    a = numpy.array(game.get_player_location(player))
+    b = numpy.array(game.get_player_location(game.get_opponent(player)))
+    c = numpy.array((3, 3))
+    my_dist = -1 * numpy.linalg.norm(a - c)
+    opp_dist = numpy.linalg.norm(b - c)
+
+    return float(my_dist + opp_dist)
+
+
+def custom_score4(game, player):
 
     if game.is_loser(player):
         return float("-inf")
@@ -84,30 +201,14 @@ def custom_score2(game, player):
     c = numpy.array((3, 3))
     my_dist = -1 * numpy.linalg.norm(a - c)
     opp_dist = numpy.linalg.norm(b - c)
-    return float(my_dist + opp_dist)
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float((my_dist + opp_dist) * (own_moves - opp_moves))
 
 
-def custom_score3(game, player):
-    """Calculate the heuristic value of a game state from the point of view
-    of the given player.
+def custom_score5(game, player):
+    """
 
-    Note: this function should be called from within a Player instance as
-    `self.score()` -- you should not need to call this function directly.
-
-    Parameters
-    ----------
-    game : `isolation.Board`
-        An instance of `isolation.Board` encoding the current state of the
-        game (e.g., player locations and blocked cells).
-
-    player : object
-        A player instance in the current game (i.e., an object corresponding to
-        one of the player objects `game.__player_1__` or `game.__player_2__`.)
-
-    Returns
-    -------
-    float
-        The heuristic value of the current game state to the specified player.
     """
 
     if game.is_loser(player):
@@ -116,10 +217,110 @@ def custom_score3(game, player):
     if game.is_winner(player):
         return float("inf")
 
+    opp_loc = game.get_player_location(game.get_opponent(player))
+    if opp_loc in [(0, 0), (0, 6), (6, 0), (6, 6)]:
+        return float("inf")
+
+    own_loc = game.get_player_location(player)
+    if own_loc in [(0, 0), (0, 6), (6, 0), (6, 6)]:
+        return float("-inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - opp_moves)
+
+
+def custom_score6(game, player):
+    """
+    A modified "improved" heuristic.
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - 2 * opp_moves)
+
+
+def custom_score7(game, player):
+    """
+    A heuristic that tries to keep the opponent close
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
     a = numpy.array(game.get_player_location(player))
-    b = numpy.array((3, 3))
+    b = numpy.array(game.get_player_location(game.get_opponent(player)))
     dist = -1 * numpy.linalg.norm(a - b)
     return float(dist)
+
+
+def custom_score8(game, player):
+    """
+    A heuristic that tries to keep the opponent far
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    a = numpy.array(game.get_player_location(player))
+    b = numpy.array(game.get_player_location(game.get_opponent(player)))
+    dist = numpy.linalg.norm(a - b)
+    return float(dist)
+
+
+def custom_score9(game, player):
+    """
+    A heuristic that changes with move_count
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves - game.move_count * opp_moves)
+
+
+def custom_score10(game, player):
+    """
+    A heuristic that changes with move_count (alternative)
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(game.move_count * own_moves - opp_moves)
+
+
+def custom_score11(game, player):
+    """
+    A heuristic that changes with move_count (alternative). Coefficients should be determined through
+    a genetic algorithm.
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(own_moves**(player.own_coef * game.move_count) - opp_moves**(player.opp_coef * game.move_count))
 
 
 class CustomPlayer:
@@ -153,7 +354,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10., name=""):
+                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -167,6 +368,8 @@ class CustomPlayer:
         self.reflect = False
         self.center = ()
         self.last_opponent_location = ()
+        self.own_coef = own_coef
+        self.opp_coef = opp_coef
 
         self.depth_at_move = dict()
 
@@ -287,9 +490,9 @@ class CustomPlayer:
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
             elif self.reflect:
                 move = self.get_reflect_move(game)
-                print("REFLECTING", move, game.get_legal_moves(), move in game.get_legal_moves(self))
-                new_game = game.forecast_move(move)
-                print(new_game.to_string())
+                # print("REFLECTING", move, game.get_legal_moves(), move in game.get_legal_moves(self))
+                # new_game = game.forecast_move(move)
+                # print(new_game.to_string())
                 if not move in game.get_legal_moves(self) and len(game.get_legal_moves()) > 0:
                     self.reflect = False
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
@@ -297,11 +500,12 @@ class CustomPlayer:
                     print(game.to_string())
 
             elif self.iterative:
-                for depth in range(1, 50):
+            # if self.iterative:
+                for depth in range(1, 100):
                     last_depth = depth
                     value, move = getattr(self, self.method)(game, depth)
                     # The following if statements end iterative deepening early based on the prediction of a win or loss
-                    if value == float("-inf") and depth > 40:
+                    if value == float("-inf") and depth > 50:
                         break
                     if value == float("inf"):
                         break
@@ -313,10 +517,12 @@ class CustomPlayer:
             pass
 
         # Return the best move from the last completed search iteration
-        # if self.iterative and last_depth > 7:
-        #     print("STUDENT MOVE", move)
-        #     print("STUDENT VALUE", value)
-        #     print("STUDENT MOVES", game.move_count)
+        # if self.iterative and last_depth > 12:
+            # print("STUDENT MOVE", move)
+            # print("STUDENT VALUE", value)
+            # print("STUDENT MOVES", game.move_count)
+            # print("LAST DEPTH: ", last_depth)
+            # print(game.to_string())
         # else:
         #     print("OPPONENT MOVE", move)
         #     print("OPPONENT VALUE", value)
@@ -457,15 +663,14 @@ class CustomPlayer:
 
         moves = dict()
 
-        if current_location in self.ab_trees:
-            legal_moves = (k[0] for k in self.ab_trees[current_location])
+        # Empirical data shows that after around move 18, optimal ordering of branches is not worth the effort (gives worse results)
+        if game.move_count < 18:
+            if current_location in self.ab_trees:
+                legal_moves = (k[0] for k in self.ab_trees[current_location])
+            else:
+                legal_moves = game.get_legal_moves()
         else:
             legal_moves = game.get_legal_moves()
-        # The code below is used to calculate the average branching factor for each move count
-        # if game.move_count in self.branching_factor:
-        #     self.branching_factor[game.move_count] = (self.branching_factor[game.move_count] + len(legal_moves)) / 2
-        # else:
-        #     self.branching_factor[game.move_count] = len(legal_moves)
 
         if maximizing_player:
             for move in legal_moves:
@@ -478,7 +683,8 @@ class CustomPlayer:
                     return v, move
                 alpha = max([alpha, v])
 
-            self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
+            if game.move_count < 18:
+                self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
                                                      reverse=True)
 
             if len(moves) > 0:
@@ -497,7 +703,8 @@ class CustomPlayer:
                     return v, move
                 beta = min([beta, v])
 
-            self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
+            if game.move_count < 18:
+                self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
                                                      reverse=False)
 
             if len(moves) > 0:
@@ -538,7 +745,7 @@ class CustomPlayerOpponent:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=10., name=""):
+                 iterative=True, method='minimax', timeout=110., name=""):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -618,6 +825,7 @@ class CustomPlayerOpponent:
                         break
             else:
                 value, move = getattr(self, self.method)(game, self.search_depth)
+
 
         except Timeout:
             # Handle any actions required at timeout, if necessary

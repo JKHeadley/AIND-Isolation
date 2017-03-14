@@ -28,6 +28,7 @@ from collections import namedtuple
 
 from isolation import Board
 from sample_players import RandomPlayer
+from sample_players import HumanPlayer
 from sample_players import null_score
 from sample_players import open_move_score
 from sample_players import improved_score
@@ -36,9 +37,16 @@ from game_agent import CustomPlayerOpponent
 from game_agent import custom_score
 from game_agent import custom_score2
 from game_agent import custom_score3
+from game_agent import custom_score4
+from game_agent import custom_score5
+from game_agent import custom_score6
+from game_agent import custom_score7
+from game_agent import custom_score8
+from game_agent import custom_score9
+from game_agent import custom_score10
 
-NUM_MATCHES = 10  # number of matches against each opponent
-TIME_LIMIT = 150  # number of milliseconds before timeout
+NUM_MATCHES = 100  # number of matches against each opponent
+TIME_LIMIT = 250  # number of milliseconds before timeout
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -63,6 +71,7 @@ Agent = namedtuple("Agent", ["player", "name"])
 first = True
 branching_factor = dict()
 match_count = dict()
+win_count = dict()
 avg_depth_at_move = dict()
 avg_time = dict()
 reflection_wins = dict()
@@ -96,14 +105,10 @@ def play_match(player1, player2):
         if player1 == winner:
             # if game == games[0]:
             #     if not player1.isOpponent:
-            #         print("WINNER: ", "PLAYER 1: STUDENT")
-            #     else:
-            #         print("WINNER: ", "PLAYER 1: OPPONENT")
+            #         print("WINNER: ", "PLAYER 1: ", winner.name)
             # else:
             #     if not player1.isOpponent:
-            #         print("WINNER: ", "PLAYER 2: STUDENT")
-            #     else:
-            #         print("WINNER: ", "PLAYER 2: OPPONENT")
+            #         print("WINNER: ", "PLAYER 2: ", winner.name)
 
 
             num_wins[player1] += 1
@@ -117,14 +122,10 @@ def play_match(player1, player2):
         elif player2 == winner:
             # if game == games[0]:
             #     if not player2.isOpponent:
-            #         print("WINNER: ", "PLAYER 2: STUDENT")
-            #     else:
-            #         print("WINNER: ", "PLAYER 2: OPPONENT")
+            #         print("WINNER: ", "PLAYER 2: ", winner.name)
             # else:
             #     if not player2.isOpponent:
-            #         print("WINNER: ", "PLAYER 1: STUDENT")
-            #     else:
-            #         print("WINNER: ", "PLAYER 1: OPPONENT")
+            #         print("WINNER: ", "PLAYER 1: ", winner.name)
 
             num_wins[player2] += 1
 
@@ -165,21 +166,34 @@ def play_match(player1, player2):
         # else:
         #     avg_time[player2] = game.time_left[player2]
 
-        if player1.name in avg_depth_at_move:
-            avg_depth_at_move[player1.name] = {k: player1.depth_at_move.get(k, 0) + avg_depth_at_move[player1.name].get(k, 0) for k in set(player1.depth_at_move) | set(avg_depth_at_move[player1.name])}
-        else:
-            avg_depth_at_move[player1.name] = player1.depth_at_move
-            
-        if player2.name in avg_depth_at_move:
-            avg_depth_at_move[player2.name] = {k: player2.depth_at_move.get(k, 0) + avg_depth_at_move[player2.name].get(k, 0) for k in set(player2.depth_at_move) | set(avg_depth_at_move[player2.name])}
-        else:
-            avg_depth_at_move[player2.name] = player2.depth_at_move
+        # if player1.name in avg_depth_at_move:
+        #     avg_depth_at_move[player1.name] = {k: player1.depth_at_move.get(k, 0) + avg_depth_at_move[player1.name].get(k, 0) for k in set(player1.depth_at_move) | set(avg_depth_at_move[player1.name])}
+        # else:
+        #     avg_depth_at_move[player1.name] = player1.depth_at_move
+        #
+        # if player2.name in avg_depth_at_move:
+        #     avg_depth_at_move[player2.name] = {k: player2.depth_at_move.get(k, 0) + avg_depth_at_move[player2.name].get(k, 0) for k in set(player2.depth_at_move) | set(avg_depth_at_move[player2.name])}
+        # else:
+        #     avg_depth_at_move[player2.name] = player2.depth_at_move
 
+        # When calculating avg_depth, we only take into account games that were won, since losses can result in irrelevant deep searches
+        if winner.name in avg_depth_at_move:
+            avg_depth_at_move[winner.name] = {
+            k: winner.depth_at_move.get(k, 0) + avg_depth_at_move[winner.name].get(k, 0) for k in
+            set(winner.depth_at_move) | set(avg_depth_at_move[winner.name])}
+        else:
+            avg_depth_at_move[winner.name] = winner.depth_at_move
+
+        if winner.name in win_count:
+            win_count[winner.name] += 1
+        else:
+            win_count[winner.name] = 1
+            
         # print(game.to_string())
         # print("WINNER: ", winner.name)
         # if winner.name != "Student":
         #     print(game.to_string())
-        if winner.name == "Student" and winner.reflect:
+        if winner.name == "Student" or winner.name == "Student2" or winner.name == "Student3" or winner.name == "Student4" and winner.reflect:
             if winner.name in reflection_wins:
                 reflection_wins[winner.name] += 1
             else:
@@ -196,11 +210,14 @@ def play_round(agents, num_matches):
     """
     Play one round (i.e., a single match between each pair of opponents)
     """
+    f = open('datafile', 'a')
     global branching_factor, match_count
     agent_1 = agents[-1]
     wins = 0.
     total = 0.
 
+    f.write("\nPlaying Matches:\n")
+    f.write("----------\n")
     print("\nPlaying Matches:")
     print("----------")
 
@@ -208,6 +225,7 @@ def play_round(agents, num_matches):
 
         counts = {agent_1.player: 0., agent_2.player: 0.}
         names = [agent_1.name, agent_2.name]
+        f.write("  Match {}: {!s:^11} vs {!s:^11}\n".format(idx + 1, *names))
         print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
 
         # Each player takes a turn going first
@@ -220,6 +238,9 @@ def play_round(agents, num_matches):
 
         wins += counts[agent_1.player]
 
+        f.write("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names))
+        f.write("\tResult: {} to {}".format(int(counts[agent_1.player]),
+                                          int(counts[agent_2.player])))
         print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
         print("\tResult: {} to {}".format(int(counts[agent_1.player]),
                                           int(counts[agent_2.player])))
@@ -232,10 +253,13 @@ def play_round(agents, num_matches):
     # print(agent_1.name, "AVERAGE TIME: ", avg_time[agent_1.player])
     # print(agent_2.name, "AVERAGE TIME: ", avg_time[agent_2.player])
 
+    f.close()
+
     return 100. * wins / total
 
 
 def main():
+    f = open('datafile', 'a')
 
     HEURISTICS = [("Null", null_score),
                   ("Open", open_move_score),
@@ -244,6 +268,7 @@ def main():
     MM_ARGS = {"search_depth": 3, "method": 'minimax', "iterative": False}
     AB_ARGS = {"search_depth": 5, "method": 'alphabeta', "iterative": False}
     CUSTOM_ARGS = {"method": 'alphabeta', 'iterative': True}
+    CUSTOM_ARGS_MM = {"method": 'minimax', 'iterative': True}
 
     # Create a collection of CPU agents using fixed-depth minimax or alpha beta
     # search, or random selection.  The agent names encode the search method
@@ -256,29 +281,42 @@ def main():
                        "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
 
+    human_agent = [Agent(HumanPlayer(), "Human")]
+
     # ID_Improved agent is used for comparison to the performance of the
     # submitted agent for calibration on the performance across different
     # systems; i.e., the performance of the student agent is considered
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
-    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
-    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    "),
-    #                Agent(CustomPlayer(score_fn=custom_score2, **CUSTOM_ARGS, name="Student2"), "Student2   "),
-    #                Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
+    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
+                   Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
+                   Agent(CustomPlayer(score_fn=custom_score6, **CUSTOM_ARGS, name="Student6"), "Student6   "),
+                   Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
+                   Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
+                   Agent(CustomPlayer(score_fn=custom_score9, **CUSTOM_ARGS, name="Student9"), "Student9   "),
+                   Agent(CustomPlayer(score_fn=custom_score10, **CUSTOM_ARGS, name="Student10"), "Student10  ")]
 
-    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
+    #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   ")]
+
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved"), "ID_Improved"),
     #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
 
-    test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student    ")]
 
-    # test_agents = [Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student2"), "Student2   ")]
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
 
     print(DESCRIPTION)
     for agentUT in test_agents:
+        f.write("\n")
+        f.write("*************************\n")
+        f.write("{:^25}".format("Evaluating: " + agentUT.name + "\n"))
+        f.write("*************************\n")
         print("")
         print("*************************")
         print("{:^25}".format("Evaluating: " + agentUT.name))
@@ -289,22 +327,30 @@ def main():
         # agents = random_agents + [agentUT]
         # agents = mm_agents + [agentUT]
         # agents = ab_agents + [agentUT]
+        # agents = human_agent + [agentUT]
         # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
+        # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
         win_ratio = play_round(agents, NUM_MATCHES)
 
+        f.write("\n\nResults:\n")
+        f.write("----------\n")
+        f.write("{!s:<15}{:>10.2f}%\n".format(agentUT.name, win_ratio))
         print("\n\nResults:")
         print("----------")
         print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
 
     for agent in test_agents:
-        avg_depth_at_move[agent.player.name] = {k: v / match_count[agent.player.name] for k, v in avg_depth_at_move[agent.player.name].items()}
+        avg_depth_at_move[agent.player.name] = {k: v / win_count[agent.player.name] for k, v in avg_depth_at_move[agent.player.name].items()}
         for k, v in avg_depth_at_move[agent.player.name].items():
             v = round(v, 2)
             avg_depth_at_move[agent.player.name][k] = v
-        print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name])
+        f.write("AVG DEPT PER MOVE FOR " + agent.name + " " + str(avg_depth_at_move[agent.player.name].values()) + "\n")
+        print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name].values())
 
     for agent in test_agents:
-        print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
+        if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
+            print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
 
+    f.close()
 if __name__ == "__main__":
     main()

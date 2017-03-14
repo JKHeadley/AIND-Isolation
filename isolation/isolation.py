@@ -342,6 +342,8 @@ class Board(object):
             #     print("CURRENT MOVE:", curr_move)
             move_end = time_left()
 
+            # print(self.to_string())
+
             # print(move_end)
             if self.active_player in self.time_left:
                 self.time_left[self.active_player] = self.time_left[self.active_player] + 150 - move_end
@@ -357,10 +359,10 @@ class Board(object):
                 move_history[-1].append(curr_move)
 
             if move_end < 0:
-                # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
-                # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
+            #     # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
+            #     # self.time_left[self.__player_2__] = self.time_left[self.__player_2__] / self.__player_2__.move_count
                 print("TIMEOUT:", move_end)
-                return self.__inactive_player__, move_history, "timeout"
+            #     return self.__inactive_player__, move_history, "timeout"
 
             if curr_move not in legal_player_moves:
                 # self.time_left[self.__player_1__] = self.time_left[self.__player_1__] / self.__player_1__.move_count
