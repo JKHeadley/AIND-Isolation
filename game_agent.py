@@ -500,10 +500,13 @@ class CustomPlayer:
                     print(game.to_string())
 
             elif self.iterative:
-            # if self.iterative:
                 for depth in range(1, 100):
                     last_depth = depth
-                    value, move = getattr(self, self.method)(game, depth)
+                    # After ~move 28, the average branching factor is 2 and AB pruning isn't effective
+                    if game.move_count < 28:
+                        value, move = getattr(self, self.method)(game, depth)
+                    else:
+                        value, move = self.minimax(game, depth)
                     # The following if statements end iterative deepening early based on the prediction of a win or loss
                     if value == float("-inf") and depth > 50:
                         break

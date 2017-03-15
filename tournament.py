@@ -75,6 +75,7 @@ win_count = dict()
 avg_depth_at_move = dict()
 avg_time = dict()
 reflection_wins = dict()
+count_reached = dict()
 
 
 def play_match(player1, player2):
@@ -188,6 +189,17 @@ def play_match(player1, player2):
             win_count[winner.name] += 1
         else:
             win_count[winner.name] = 1
+
+        if winner.name in count_reached:
+            for i in range(0, len(winner.depth_at_move) + 1):
+                if i in count_reached[winner.name]:
+                    count_reached[winner.name][i] += 1
+                else:
+                    count_reached[winner.name][i] = 1
+        else:
+            for i in range(0, len(winner.depth_at_move) + 1):
+                count_reached[winner.name] = dict()
+                count_reached[winner.name][i] = 1
             
         # print(game.to_string())
         # print("WINNER: ", winner.name)
@@ -289,14 +301,17 @@ def main():
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
+    #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
+    #                Agent(CustomPlayer(score_fn=custom_score6, **CUSTOM_ARGS, name="Student6"), "Student6   "),
+    #                Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
+    #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
+    #                Agent(CustomPlayer(score_fn=custom_score9, **CUSTOM_ARGS, name="Student9"), "Student9   "),
+    #                Agent(CustomPlayer(score_fn=custom_score10, **CUSTOM_ARGS, name="Student10"), "Student10  ")]
+
     test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
                    Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
-                   Agent(CustomPlayer(score_fn=custom_score6, **CUSTOM_ARGS, name="Student6"), "Student6   "),
-                   Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
-                   Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
-                   Agent(CustomPlayer(score_fn=custom_score9, **CUSTOM_ARGS, name="Student9"), "Student9   "),
-                   Agent(CustomPlayer(score_fn=custom_score10, **CUSTOM_ARGS, name="Student10"), "Student10  ")]
-
+                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student   ")]
 
     # test_agents = [Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
     #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   ")]
@@ -346,6 +361,11 @@ def main():
             avg_depth_at_move[agent.player.name][k] = v
         f.write("AVG DEPT PER MOVE FOR " + agent.name + " " + str(avg_depth_at_move[agent.player.name].values()) + "\n")
         print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name].values())
+
+        count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
+                                                 reverse=False)
+        f.write("COUNTS REACHED FOR " + agent.name + " " + str(count_reached[agent.player.name]) + "\n")
+        print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
 
     for agent in test_agents:
         if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
