@@ -759,7 +759,7 @@ class CustomPlayerOpponent:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=110., name=""):
+                 iterative=True, method='minimax', timeout=110., name="", dynamic=False):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -769,6 +769,7 @@ class CustomPlayerOpponent:
         self.isOpponent = True
         self.move_count = 0
         self.name = name
+        self.dynamic = dynamic
 
         self.depth_at_move = dict()
 
@@ -831,8 +832,17 @@ class CustomPlayerOpponent:
 
             if self.iterative:
                 for depth in range(1, 100):
+
                     last_depth = depth
-                    value, move = getattr(self, self.method)(game, depth)
+                    # After ~move 28, the average branching factor is 2 and AB pruning isn't effective
+                    if self.dynamic:
+                        if game.move_count < 28:
+                            value, move = getattr(self, self.method)(game, depth)
+                        else:
+                            value, move = self.minimax(game, depth)
+                    else:
+                        value, move = getattr(self, self.method)(game, depth)
+                    # The following if statements end iterative deepening early based on the prediction of a win or loss
                     if value == float("-inf") and depth > 50:
                         break
                     if value == float("inf"):

@@ -46,7 +46,7 @@ from game_agent import custom_score9
 from game_agent import custom_score10
 from game_agent import custom_score11
 
-NUM_MATCHES = 20  # number of matches against each opponent
+NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
 GENETIC = True
 
@@ -312,7 +312,10 @@ def main():
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
-    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student   ")]
+    #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Dynamic", dynamic=True), "ID_Improved_Dynamic")]
+
+    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Dynamic", dynamic=True),
+              "ID_Improved_Dynamic")]
 
     # test_agents = [Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
     #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   ")]
@@ -327,10 +330,11 @@ def main():
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
     if GENETIC:
-        best = [((0, 0), 0)]
+        best = [((0.8105493453115087, 1.4671911298033793), 0)]
         performance = []
         test_agents = []
 
+        test_agents.append(Agent(CustomPlayer(score_fn=custom_score11, **CUSTOM_ARGS, name=-1, own_coef=best[0][0][0], opp_coef=best[0][0][1]), -1))
         # initialize agents with random weights
         for i in range(0, 5):
             test_agents.append(Agent(CustomPlayer(score_fn=custom_score11, **CUSTOM_ARGS, name=i, own_coef=random.uniform(-2, 2), opp_coef=random.uniform(-2, 2)), i))
@@ -341,7 +345,7 @@ def main():
             f = open('datafile', 'a')
 
             for agentUT in test_agents:
-                
+
                 agents = random_agents + mm_agents + ab_agents + [agentUT]
 
                 win_ratio = play_round(agents, NUM_MATCHES)
