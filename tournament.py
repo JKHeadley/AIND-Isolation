@@ -44,9 +44,11 @@ from game_agent import custom_score7
 from game_agent import custom_score8
 from game_agent import custom_score9
 from game_agent import custom_score10
+from game_agent import custom_score11
 
-NUM_MATCHES = 100  # number of matches against each opponent
+NUM_MATCHES = 20  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
+GENETIC = True
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -250,10 +252,10 @@ def play_round(agents, num_matches):
 
         wins += counts[agent_1.player]
 
-        f.write("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names))
+        # f.write("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names))
         f.write("\tResult: {} to {}".format(int(counts[agent_1.player]),
                                           int(counts[agent_2.player])))
-        print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
+        # print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
         print("\tResult: {} to {}".format(int(counts[agent_1.player]),
                                           int(counts[agent_2.player])))
 
@@ -271,7 +273,6 @@ def play_round(agents, num_matches):
 
 
 def main():
-    f = open('datafile', 'a')
 
     HEURISTICS = [("Null", null_score),
                   ("Open", open_move_score),
@@ -309,9 +310,9 @@ def main():
     #                Agent(CustomPlayer(score_fn=custom_score9, **CUSTOM_ARGS, name="Student9"), "Student9   "),
     #                Agent(CustomPlayer(score_fn=custom_score10, **CUSTOM_ARGS, name="Student10"), "Student10  ")]
 
-    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
-                   Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
-                   Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student   ")]
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
+    #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
+    #                Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Student"), "Student   ")]
 
     # test_agents = [Agent(CustomPlayer(score_fn=custom_score7, **CUSTOM_ARGS, name="Student7"), "Student7   "),
     #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   ")]
@@ -325,52 +326,114 @@ def main():
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
+    if GENETIC:
+        best = [((0, 0), 0)]
+        performance = []
+        test_agents = []
 
-    print(DESCRIPTION)
-    for agentUT in test_agents:
-        f.write("\n")
-        f.write("*************************\n")
-        f.write("{:^25}".format("Evaluating: " + agentUT.name + "\n"))
-        f.write("*************************\n")
-        print("")
-        print("*************************")
-        print("{:^25}".format("Evaluating: " + agentUT.name))
-        print("*************************")
+        # initialize agents with random weights
+        for i in range(0, 5):
+            test_agents.append(Agent(CustomPlayer(score_fn=custom_score11, **CUSTOM_ARGS, name=i, own_coef=random.uniform(-2, 2), opp_coef=random.uniform(-2, 2)), i))
 
-        agents = random_agents + mm_agents + ab_agents + [agentUT]
-        # agents = random_agents + mm_agents + [agentUT]
-        # agents = random_agents + [agentUT]
-        # agents = mm_agents + [agentUT]
-        # agents = ab_agents + [agentUT]
-        # agents = human_agent + [agentUT]
-        # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
-        # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
-        win_ratio = play_round(agents, NUM_MATCHES)
+        print(DESCRIPTION)
 
-        f.write("\n\nResults:\n")
-        f.write("----------\n")
-        f.write("{!s:<15}{:>10.2f}%\n".format(agentUT.name, win_ratio))
-        print("\n\nResults:")
-        print("----------")
-        print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
+        while True:
+            f = open('datafile', 'a')
 
-    for agent in test_agents:
-        avg_depth_at_move[agent.player.name] = {k: v / win_count[agent.player.name] for k, v in avg_depth_at_move[agent.player.name].items()}
-        for k, v in avg_depth_at_move[agent.player.name].items():
-            v = round(v, 2)
-            avg_depth_at_move[agent.player.name][k] = v
-        f.write("AVG DEPT PER MOVE FOR " + agent.name + " " + str(avg_depth_at_move[agent.player.name].values()) + "\n")
-        print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name].values())
+            for agentUT in test_agents:
+                
+                agents = random_agents + mm_agents + ab_agents + [agentUT]
 
-        count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
-                                                 reverse=False)
-        f.write("COUNTS REACHED FOR " + agent.name + " " + str(count_reached[agent.player.name]) + "\n")
-        print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
+                win_ratio = play_round(agents, NUM_MATCHES)
 
-    for agent in test_agents:
-        if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
-            print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
+                performance.append(((agentUT.player.own_coef, agentUT.player.opp_coef), win_ratio))
 
-    f.close()
+                f.write(str(performance[-1][1]) + "\n")
+                print(str(performance[-1][1]) + "\n")
+
+            performance = sorted(performance, key=lambda x: x[1], reverse=True)
+
+            local_best = performance[0]
+
+            current_best = best[-1]
+
+            if local_best[1] > current_best[1]:
+                f.write("FOUND BETTER: " + str(local_best) + "\n")
+                print("FOUND BETTER: " + str(local_best) + "\n")
+                best.append(local_best)
+
+            current_best_values = best[-1][0]
+            second_best_values = performance[1][0]
+
+            values = [
+                (current_best_values[0] + random.uniform(-0.1, 0.1), current_best_values[1] + random.uniform(-0.1, 0.1)),
+                (current_best_values[0] + random.uniform(-0.2, 0.2), current_best_values[1] + random.uniform(-0.2, 0.2)),
+                (second_best_values[0] + random.uniform(-0.3, 0.3), second_best_values[1] + random.uniform(-0.3, 0.3)),
+                (random.uniform(-2, 2), random.uniform(-2, 2)),
+                (random.uniform(-2, 2), random.uniform(-2, 2))
+            ]
+
+            f.write("BEST: " + str(best) + "\n")
+            print("BEST:", best)
+
+            f.write("NEW VALUES: " + str(values) + "\n")
+            print("NEW VALUES: " + str(values) + "\n")
+
+            for i in range(0, 5):
+                test_agents[i] = Agent(CustomPlayer(score_fn=custom_score11, **CUSTOM_ARGS, name=i, own_coef=values[i][0], opp_coef=values[i][1]), i)
+
+            f.close()
+
+    else:
+        f = open('datafile', 'a')
+
+        print(DESCRIPTION)
+        for agentUT in test_agents:
+            f.write("\n")
+            f.write("*************************\n")
+            f.write("{:^25}".format("Evaluating: " + agentUT.name + "\n"))
+            f.write("*************************\n")
+            print("")
+            print("*************************")
+            print("{:^25}".format("Evaluating: " + agentUT.name))
+            print("*************************")
+
+            agents = random_agents + mm_agents + ab_agents + [agentUT]
+            # agents = random_agents + mm_agents + [agentUT]
+            # agents = random_agents + [agentUT]
+            # agents = mm_agents + [agentUT]
+            # agents = ab_agents + [agentUT]
+            # agents = human_agent + [agentUT]
+            # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
+            # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
+            win_ratio = play_round(agents, NUM_MATCHES)
+
+            f.write("\n\nResults:\n")
+            f.write("----------\n")
+            f.write("{!s:<15}{:>10.2f}%\n".format(agentUT.name, win_ratio))
+            print("\n\nResults:")
+            print("----------")
+            print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
+
+        for agent in test_agents:
+            avg_depth_at_move[agent.player.name] = {k: v / win_count[agent.player.name] for k, v in
+                                                    avg_depth_at_move[agent.player.name].items()}
+            for k, v in avg_depth_at_move[agent.player.name].items():
+                v = round(v, 2)
+                avg_depth_at_move[agent.player.name][k] = v
+            f.write(
+                "AVG DEPT PER MOVE FOR " + agent.name + " " + str(avg_depth_at_move[agent.player.name].values()) + "\n")
+            print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name].values())
+
+            count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
+                                                      reverse=False)
+            f.write("COUNTS REACHED FOR " + agent.name + " " + str(count_reached[agent.player.name]) + "\n")
+            print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
+
+        for agent in test_agents:
+            if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
+                print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
+
+        f.close()
 if __name__ == "__main__":
     main()

@@ -320,7 +320,18 @@ def custom_score11(game, player):
 
     own_moves = len(game.get_legal_moves(player))
     opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(own_moves**(player.own_coef * game.move_count) - opp_moves**(player.opp_coef * game.move_count))
+
+    if own_moves == 0:
+        own_value = 0
+    else:
+        own_value = float(own_moves**(player.own_coef * game.move_count))
+
+    if opp_moves == 0:
+        opp_value = 0
+    else:
+        opp_value = float(opp_moves**(player.opp_coef * game.move_count))
+
+    return own_value - opp_value
 
 
 class CustomPlayer:
