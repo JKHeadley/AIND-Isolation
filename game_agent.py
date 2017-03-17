@@ -395,7 +395,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1, dynamic=False):
+                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1, dynamic=True):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
