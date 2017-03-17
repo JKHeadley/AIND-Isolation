@@ -334,6 +334,36 @@ def custom_score11(game, player):
     return own_value - opp_value
 
 
+def custom_score12(game, player):
+    """
+    A heuristic that changes with move_count (alternative)
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(player.own_coef * game.move_count * own_moves - player.opp_coef * game.move_count * opp_moves)
+
+
+def custom_score13(game, player):
+    """
+    A heuristic that changes with move_count (alternative)
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    return float(player.own_coef * own_moves - player.opp_coef * opp_moves)
+
+
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
     and a depth-limited minimax algorithm with alpha-beta pruning. You must
@@ -365,7 +395,7 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1):
+                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1, dynamic=False):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -377,6 +407,7 @@ class CustomPlayer:
         self.move_count = 0
         self.name = name
         self.reflect = False
+        self.dynamic = dynamic
         self.center = ()
         self.last_opponent_location = ()
         self.own_coef = own_coef
@@ -514,10 +545,13 @@ class CustomPlayer:
                 for depth in range(1, 100):
                     last_depth = depth
                     # After ~move 28, the average branching factor is 2 and AB pruning isn't effective
-                    if game.move_count < 28:
-                        value, move = getattr(self, self.method)(game, depth)
+                    if self.dynamic:
+                        if game.move_count < 28:
+                            value, move = getattr(self, self.method)(game, depth)
+                        else:
+                            value, move = self.minimax(game, depth)
                     else:
-                        value, move = self.minimax(game, depth)
+                        value, move = getattr(self, self.method)(game, depth)
                     # The following if statements end iterative deepening early based on the prediction of a win or loss
                     if value == float("-inf") and depth > 50:
                         break
@@ -726,36 +760,6 @@ class CustomPlayer:
                 return moves[value], value
             else:
                 return float("inf"), (-1, -1)
-
-
-def custom_score12(game, player):
-    """
-    A heuristic that changes with move_count (alternative)
-    """
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(player.own_coef * game.move_count * own_moves - player.opp_coef * game.move_count * opp_moves)
-
-
-def custom_score13(game, player):
-    """
-    A heuristic that changes with move_count (alternative)
-    """
-    if game.is_loser(player):
-        return float("-inf")
-
-    if game.is_winner(player):
-        return float("inf")
-
-    own_moves = len(game.get_legal_moves(player))
-    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
-    return float(player.own_coef * own_moves - player.opp_coef * opp_moves)
 
 
 class CustomPlayerOpponent:
