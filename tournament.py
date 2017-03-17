@@ -48,9 +48,9 @@ from game_agent import custom_score11
 from game_agent import custom_score12
 from game_agent import custom_score13
 
-NUM_MATCHES = 100  # number of matches against each opponent
+NUM_MATCHES = 80  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = False
+GENETIC = True
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -296,6 +296,11 @@ def main():
                        "AB_" + name) for name, h in HEURISTICS]
     random_agents = [Agent(RandomPlayer(), "Random")]
 
+    best_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
+                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student8"), "Student8   "),
+                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
+                   Agent(CustomPlayer(score_fn=custom_score6, **CUSTOM_ARGS, name="Student6"), "Student6   ")]
+
     human_agent = [Agent(HumanPlayer(), "Human")]
 
     # ID_Improved agent is used for comparison to the performance of the
@@ -356,7 +361,7 @@ def main():
 
             for agentUT in test_agents:
 
-                agents = random_agents + mm_agents + ab_agents + [agentUT]
+                agents = best_agents + [agentUT]
 
                 win_ratio = play_round(agents, NUM_MATCHES)
 
