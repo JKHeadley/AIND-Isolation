@@ -364,6 +364,25 @@ def custom_score13(game, player):
     return float(player.own_coef * own_moves - player.opp_coef * opp_moves)
 
 
+def custom_score14(game, player):
+    """
+    A heuristic that changes with move_count (alternative).
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    own_value = float(own_moves * game.move_count**player.own_coef)
+
+    opp_value = float(opp_moves * game.move_count**player.opp_coef)
+
+    return own_value - opp_value
+
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
     and a depth-limited minimax algorithm with alpha-beta pruning. You must
