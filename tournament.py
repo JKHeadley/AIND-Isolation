@@ -51,7 +51,7 @@ from game_agent import custom_score14
 
 NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = True
+GENETIC = False
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -300,7 +300,8 @@ def main():
     best_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
                    Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
                    Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
-                   Agent(CustomPlayer(score_fn=custom_score6, **CUSTOM_ARGS, name="Student6"), "Student6   ")]
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=0.6594481278701347, opp_coef=0.47471190815440867), "Student12   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
 
