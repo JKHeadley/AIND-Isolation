@@ -340,9 +340,11 @@ def main():
     if GENETIC:
         initial_values = [
             (0.9852293476185732, 0.7948372759968827),
-            (0.39942899534606224, 0.42228860415240554),
-            (-0.48734140694649225, -0.3024905920755735),
-            (1.0972203609337623, 1.719132146560611)
+            # (0.39942899534606224, 0.42228860415240554),
+            # (-0.48734140694649225, -0.3024905920755735),
+            # (1.0972203609337623, 1.719132146560611),
+            # (0.4300136385708758, 1.6483021020186137),
+            # (0.3491065768485472, 0.2541839464646465)
         ]
 
         best = [((0, 0), 0)]
@@ -350,6 +352,9 @@ def main():
 
         performance = []
         test_agents = []
+
+        for i in range(0, 3):
+            initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
 
         #test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=-1, own_coef=best[0][0][0], opp_coef=best[0][0][1]), -1))
         # initialize agents with random weights
