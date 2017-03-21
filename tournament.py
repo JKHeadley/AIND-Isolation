@@ -310,17 +310,17 @@ def main():
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
-    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
-    #                Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
-    #                Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
-    #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
-    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   ")]
+    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+                   Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   "),
+                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
-    test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=0.9852293476185732, opp_coef=0.7948372759968827), "0   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "1   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.0000590407371983, opp_coef=0.8255664594044414), "2   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.7731128114943164, opp_coef=1.9257477864078922), "3   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=-0.5455812665770814, opp_coef=-0.42114230243616285), "4   ")]
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=0.9852293476185732, opp_coef=0.7948372759968827), "0   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "1   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.0000590407371983, opp_coef=0.8255664594044414), "2   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.7731128114943164, opp_coef=1.9257477864078922), "3   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=-0.5455812665770814, opp_coef=-0.42114230243616285), "4   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
