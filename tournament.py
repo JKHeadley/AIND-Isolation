@@ -49,7 +49,7 @@ from game_agent import custom_score12
 from game_agent import custom_score13
 from game_agent import custom_score14
 
-NUM_MATCHES = 1  # number of matches against each opponent
+NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
 GENETIC = False
 
@@ -316,6 +316,12 @@ def main():
     #                Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
     #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   ")]
 
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=0.9852293476185732, opp_coef=0.7948372759968827), "0   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "1   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.0000590407371983, opp_coef=0.8255664594044414), "2   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.7731128114943164, opp_coef=1.9257477864078922), "3   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=-0.5455812665770814, opp_coef=-0.42114230243616285), "4   ")]
+
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Dynamic", dynamic=True), "ID_Improved_Dynamic")]
@@ -335,7 +341,7 @@ def main():
 
     # test_agents = [Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
-    test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
+    # test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
     if GENETIC:
         initial_values = [
@@ -427,7 +433,7 @@ def main():
             print("{:^25}".format("Evaluating: " + agentUT.name))
             print("*************************")
 
-            agents = random_agents + mm_agents + ab_agents + [agentUT]
+            # agents = random_agents + mm_agents + ab_agents + [agentUT]
             # agents = random_agents + mm_agents + [agentUT]
             # agents = random_agents + [agentUT]
             # agents = mm_agents + [agentUT]
@@ -436,6 +442,7 @@ def main():
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
             # agents = best_agents + [agentUT]
+            agents = test_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
             f.write("\n\nResults:\n")
