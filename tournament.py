@@ -51,7 +51,7 @@ from game_agent import custom_score14
 
 NUM_MATCHES = 200  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = False
+GENETIC = True
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -346,12 +346,11 @@ def main():
 
     if GENETIC:
         initial_values = [
-            (0.9852293476185732, 0.7948372759968827),
-            # (0.39942899534606224, 0.42228860415240554),
-            # (-0.48734140694649225, -0.3024905920755735),
-            # (1.0972203609337623, 1.719132146560611),
-            # (0.4300136385708758, 1.6483021020186137),
-            # (0.3491065768485472, 0.2541839464646465)
+            (1.492220782479327, 0.7729218598739231),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2))
         ]
 
         best = [((0, 0), 0)]
@@ -360,15 +359,15 @@ def main():
         performance = []
         test_agents = []
 
-        for i in range(0, 3):
-            initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
+        # for i in range(0, 3):
+        #     initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
 
         #test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=-1, own_coef=best[0][0][0], opp_coef=best[0][0][1]), -1))
         # initialize agents with random weights
-        for i in range(0, 4):
+        for i in range(0, 5):
             # initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
             # test_agents.append(Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name=i, own_coef=best[i][0][0], opp_coef=best[i][0][1]), i))
-            test_agents.append(Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name=i, own_coef=initial_values[i][0], opp_coef=initial_values[i][1]), i))
+            test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=initial_values[i][0], opp_coef=initial_values[i][1]), i))
 
         print(DESCRIPTION)
 
@@ -379,7 +378,7 @@ def main():
 
             for agentUT in test_agents:
 
-                agents = best_agents + [agentUT]
+                agents = test_agents + [agentUT]
 
                 win_ratio = play_round(agents, NUM_MATCHES)
 
@@ -406,6 +405,7 @@ def main():
                 (current_best_values[0] + random.uniform(-0.1, 0.1), current_best_values[1] + random.uniform(-0.1, 0.1)),
                 (current_best_values[0] + random.uniform(-0.2, 0.2), current_best_values[1] + random.uniform(-0.2, 0.2)),
                 (second_best_values[0] + random.uniform(-0.3, 0.3), second_best_values[1] + random.uniform(-0.3, 0.3)),
+                (random.uniform(0, 2), random.uniform(0, 2)),
                 (random.uniform(0, 2), random.uniform(0, 2))
             ]
 
@@ -415,8 +415,8 @@ def main():
             f.write("NEW VALUES: " + str(values) + "\n")
             print("NEW VALUES: " + str(values) + "\n")
 
-            for i in range(0, 4):
-                test_agents[i] = Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name=i, own_coef=values[i][0], opp_coef=values[i][1]), i)
+            for i in range(0, 5):
+                test_agents[i] = Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=values[i][0], opp_coef=values[i][1]), i)
 
             f.close()
 
