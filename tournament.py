@@ -49,9 +49,9 @@ from game_agent import custom_score12
 from game_agent import custom_score13
 from game_agent import custom_score14
 
-NUM_MATCHES = 200  # number of matches against each opponent
+NUM_MATCHES = 800  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = True
+GENETIC = False
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -95,14 +95,17 @@ def play_match(player1, player2):
     num_wins = {player1: 0, player2: 0}
     num_timeouts = {player1: 0, player2: 0}
     num_invalid_moves = {player1: 0, player2: 0}
-    games = [Board(player1, player2), Board(player2, player1)]
-    # games = [Board(player2, player1), Board(player2, player1)]
+    # games = [Board(player1, player2), Board(player2, player1)]
+    games = [Board(player1, player2)]
 
-    # initialize both games with a random move and response
-    # for _ in range(1):
-    #     move = random.choice(games[0].get_legal_moves())
-        # games[0].apply_move(move)
-        # games[1].apply_move(move)
+    # Testing opening moves for p2
+    legal_moves = games[0].get_legal_moves()
+    legal_moves.remove(player2.opening_move)
+    move = random.choice(legal_moves)
+    games[0].apply_move(move)
+    games[0].apply_move(player2.opening_move)
+
+    # print(games[0].to_string())
 
     # play both games and tally the results
     for game in games:
@@ -244,15 +247,17 @@ def play_round(agents, num_matches):
             counts = {agent_1.player: 0., agent_2.player: 0.}
             names = [agent_1.name, agent_2.name]
             f.write("  Match {}: {!s:^11} vs {!s:^11}\n".format(idx + 1, *names))
-            print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
+            print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end='\n')
 
             # Each player takes a turn going first
-            for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
-                for _ in range(num_matches):
-                    score_1, score_2 = play_match(p1, p2)
-                    counts[p1] += score_1
-                    counts[p2] += score_2
-                    total += score_1 + score_2
+            # for p1, p2 in itertools.permutations((agent_1.player, agent_2.player)):
+            p1 = agent_2.player
+            p2 = agent_1.player
+            for _ in range(num_matches):
+                score_1, score_2 = play_match(p1, p2)
+                counts[p1] += score_1
+                counts[p2] += score_2
+                total += score_1 + score_2
 
             wins += counts[agent_1.player]
 
@@ -311,17 +316,21 @@ def main():
     # relative to the performance of the ID_Improved agent to account for
     # faster or slower computers.
 
-    test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
-                   Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
-                   Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   "),
-                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
+    # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved"),
+    #                Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
+    #                Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   "),
+    #                Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
-    # test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=0.9852293476185732, opp_coef=0.7948372759968827), "0   "),
-    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "1   "),
-    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.0000590407371983, opp_coef=0.8255664594044414), "2   "),
-    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.7731128114943164, opp_coef=1.9257477864078922), "3   "),
-    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=-0.5455812665770814, opp_coef=-0.42114230243616285), "4   ")]
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(3, 3)), "0   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(2, 2)), "1   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(1, 1)), "2   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(0, 0)), "3   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(2, 3)), "4   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="5", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(0, 1)), "5   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="6", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(1, 3)), "6   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="7", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(0, 2)), "7   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="8", own_coef=1.492220782479327, opp_coef=0.7729218598739231, opening_move=(0, 3)), "8   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
@@ -442,8 +451,8 @@ def main():
             # agents = human_agent + [agentUT]
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
-            # agents = best_agents + [agentUT]
-            agents = test_agents + [agentUT]
+            agents = best_agents + [agentUT]
+            # agents = test_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
             f.write("\n\nResults:\n")

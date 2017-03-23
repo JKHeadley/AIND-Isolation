@@ -383,6 +383,7 @@ def custom_score14(game, player):
 
     return own_value - opp_value
 
+
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
     and a depth-limited minimax algorithm with alpha-beta pruning. You must
@@ -414,7 +415,8 @@ class CustomPlayer:
     """
 
     def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1, dynamic=True):
+                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1,
+                 dynamic=True, opening_move=(3, 3)):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -431,6 +433,8 @@ class CustomPlayer:
         self.last_opponent_location = ()
         self.own_coef = own_coef
         self.opp_coef = opp_coef
+
+        self.opening_move = opening_move
 
         self.depth_at_move = dict()
 
