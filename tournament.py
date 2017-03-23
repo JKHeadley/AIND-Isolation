@@ -301,7 +301,7 @@ def main():
     best_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
                    Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
                    Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   ")]
+                   Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
 
@@ -346,11 +346,10 @@ def main():
 
     if GENETIC:
         initial_values = [
+            (random.uniform(0, 2), random.uniform(0, 2),
             (1.492220782479327, 0.7729218598739231),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2))
+            (1.8445328039584274, 1.1293807409191874),
+            (1.1006980138853246, 0.9458528727213513))
         ]
 
         best = [((0, 0), 0)]
@@ -364,7 +363,7 @@ def main():
 
         #test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=-1, own_coef=best[0][0][0], opp_coef=best[0][0][1]), -1))
         # initialize agents with random weights
-        for i in range(0, 5):
+        for i in range(0, 4):
             # initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
             # test_agents.append(Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name=i, own_coef=best[i][0][0], opp_coef=best[i][0][1]), i))
             test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=initial_values[i][0], opp_coef=initial_values[i][1]), i))
@@ -378,7 +377,7 @@ def main():
 
             for agentUT in test_agents:
 
-                agents = test_agents + [agentUT]
+                agents = best_agents + [agentUT]
 
                 win_ratio = play_round(agents, NUM_MATCHES)
 
@@ -405,7 +404,6 @@ def main():
                 (current_best_values[0] + random.uniform(-0.1, 0.1), current_best_values[1] + random.uniform(-0.1, 0.1)),
                 (current_best_values[0] + random.uniform(-0.2, 0.2), current_best_values[1] + random.uniform(-0.2, 0.2)),
                 (second_best_values[0] + random.uniform(-0.3, 0.3), second_best_values[1] + random.uniform(-0.3, 0.3)),
-                (random.uniform(0, 2), random.uniform(0, 2)),
                 (random.uniform(0, 2), random.uniform(0, 2))
             ]
 
@@ -415,7 +413,7 @@ def main():
             f.write("NEW VALUES: " + str(values) + "\n")
             print("NEW VALUES: " + str(values) + "\n")
 
-            for i in range(0, 5):
+            for i in range(0, 4):
                 test_agents[i] = Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=values[i][0], opp_coef=values[i][1]), i)
 
             f.close()
