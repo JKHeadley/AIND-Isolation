@@ -53,7 +53,7 @@ from game_agent import custom_score12
 from game_agent import custom_score13
 from game_agent import custom_score14
 
-NUM_MATCHES = 100  # number of matches against each opponent
+NUM_MATCHES = 200  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
 GENETIC = False
 
@@ -443,7 +443,7 @@ def main():
             print("{:^25}".format("Evaluating: " + agentUT.name))
             print("*************************")
 
-            agents = random_agents + mm_agents + ab_agents + [agentUT]
+            # agents = random_agents + mm_agents + ab_agents + [agentUT]
             # agents = random_agents + mm_agents + [agentUT]
             # agents = random_agents + [agentUT]
             # agents = mm_agents + [agentUT]
@@ -452,7 +452,7 @@ def main():
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
             # agents = best_agents + [agentUT]
-            # agents = best_agents + [agentUT]
+            agents = best_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
             f.write("\n\nResults:\n")
