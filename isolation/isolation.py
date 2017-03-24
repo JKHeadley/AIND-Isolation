@@ -56,6 +56,16 @@ class Board(object):
 
         self.__show_moves__ = False
 
+    def hash(self):
+        x1 = self.__last_player_move__[self.__player_1__]
+        x2 = self.__last_player_move__[self.__player_2__]
+        _board = list(map(lambda x: int(bool(x)),
+                          sum(map(list, zip(*self.__board_state__)), [])))
+        _board.append(self.move_count % 2)
+        _board.append(x2 if x2 is None else x2[0] + x2[1] * self.height)
+        _board.append(x1 if x1 is None else x1[0] + x1[1] * self.height)
+        return hash(str(_board))
+
     def show_moves(self):
         self.__show_moves__ = True
         return
