@@ -52,10 +52,11 @@ from game_agent import custom_score11
 from game_agent import custom_score12
 from game_agent import custom_score13
 from game_agent import custom_score14
+from game_agent import custom_score15
 
-NUM_MATCHES = 200  # number of matches against each opponent
+NUM_MATCHES = 50  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = False
+GENETIC = True
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -231,14 +232,11 @@ def play_round(agents, num_matches):
     """
     Play one round (i.e., a single match between each pair of opponents)
     """
-    f = open('datafile', 'a')
     global branching_factor, match_count
     agent_1 = agents[-1]
     wins = 0.
     total = 0.
 
-    f.write("\nPlaying Matches:\n")
-    f.write("----------\n")
     print("\nPlaying Matches:")
     print("----------")
 
@@ -247,7 +245,6 @@ def play_round(agents, num_matches):
         if agent_1.player != agent_2.player:
             counts = {agent_1.player: 0., agent_2.player: 0.}
             names = [agent_1.name, agent_2.name]
-            f.write("  Match {}: {!s:^11} vs {!s:^11}\n".format(idx + 1, *names))
             print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
 
             # Each player takes a turn going first
@@ -260,9 +257,6 @@ def play_round(agents, num_matches):
 
             wins += counts[agent_1.player]
 
-            # f.write("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names))
-            f.write("\tResult: {} to {}".format(int(counts[agent_1.player]),
-                                              int(counts[agent_2.player])))
             # print("  Match {}: {!s:^11} vs {!s:^11}".format(idx + 1, *names), end=' ')
             print("\tResult: {} to {}".format(int(counts[agent_1.player]),
                                               int(counts[agent_2.player])))
@@ -274,8 +268,6 @@ def play_round(agents, num_matches):
 
     # print(agent_1.name, "AVERAGE TIME: ", avg_time[agent_1.player])
     # print(agent_2.name, "AVERAGE TIME: ", avg_time[agent_2.player])
-
-    f.close()
 
     return 100. * wins / total
 
@@ -303,8 +295,8 @@ def main():
     random_agents = [Agent(RandomPlayer(), "Random")]
 
     best_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
-                   Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
-                   Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
+                   # Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
+                   # Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
                    Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
@@ -362,14 +354,28 @@ def main():
     # test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
     if GENETIC:
-        initial_values = [
+        initial_coef = [
             (random.uniform(0, 2), random.uniform(0, 2)),
-            (1.492220782479327, 0.7729218598739231),
-            (1.8445328039584274, 1.1293807409191874),
-            (1.1006980138853246, 0.9458528727213513)
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2))
         ]
 
-        best = [((0, 0), 0)]
+        initial_const = [
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2)),
+            (random.uniform(0, 2), random.uniform(0, 2))
+        ]
+
+        initial_modifier = [
+            random.uniform(0, 3.5) * 10,
+            random.uniform(0, 3.5) * 10,
+            random.uniform(0, 3.5) * 10,
+            random.uniform(0, 3.5) * 10,
+        ]
+
+        best = [((0, 0), (0, 0), 0, 0)]
         # initial_values = []
 
         performance = []
@@ -383,57 +389,73 @@ def main():
         for i in range(0, 4):
             # initial_values.append((random.uniform(-1, 2), random.uniform(-1, 2)))
             # test_agents.append(Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name=i, own_coef=best[i][0][0], opp_coef=best[i][0][1]), i))
-            test_agents.append(Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=initial_values[i][0], opp_coef=initial_values[i][1]), i))
+            test_agents.append(Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name=i, own_coef=initial_coef[i][0], opp_coef=initial_coef[i][1],
+                                     own_const=initial_const[i][0], opp_const=initial_const[i][1], modifier=initial_modifier[i]), i))
 
         print(DESCRIPTION)
 
-        print("INITIAL VALUES: " + str(initial_values) + "\n")
+        print("INITIAL COEF: " + str(initial_coef) + "\n")
+        print("INITIAL CONST: " + str(initial_const) + "\n")
+        print("INITIAL MOD: " + str(initial_modifier) + "\n")
 
         while True:
-            f = open('datafile', 'a')
-
             for agentUT in test_agents:
 
                 agents = best_agents + [agentUT]
 
                 win_ratio = play_round(agents, NUM_MATCHES)
 
-                performance.append(((agentUT.player.own_coef, agentUT.player.opp_coef), win_ratio))
+                performance.append(((agentUT.player.own_coef, agentUT.player.opp_coef), (agentUT.player.own_const, agentUT.player.opp_const), agentUT.player.modifier, win_ratio))
 
-                f.write(str(performance[-1][1]) + "\n")
-                print(str(performance[-1][1]) + "\n")
+                print(str(performance[-1][3]) + "\n")
 
-            performance = sorted(performance, key=lambda x: x[1], reverse=True)
+            performance = sorted(performance, key=lambda x: x[3], reverse=True)
 
             local_best = performance[0]
 
             current_best = best[-1]
 
             if local_best[1] > current_best[1]:
-                f.write("FOUND BETTER: " + str(local_best) + "\n")
                 print("FOUND BETTER: " + str(local_best) + "\n")
                 best.append(local_best)
 
-            current_best_values = best[-1][0]
-            second_best_values = performance[1][0]
+            current_best_coefs = best[-1][0]
+            current_best_consts = best[-1][1]
+            current_best_modifier = best[-1][2]
+            second_best_coefs = performance[1][0]
+            second_best_consts = performance[1][1]
+            second_best_modifier = performance[1][2]
 
-            values = [
-                (current_best_values[0] + random.uniform(-0.1, 0.1), current_best_values[1] + random.uniform(-0.1, 0.1)),
-                (current_best_values[0] + random.uniform(-0.2, 0.2), current_best_values[1] + random.uniform(-0.2, 0.2)),
-                (second_best_values[0] + random.uniform(-0.3, 0.3), second_best_values[1] + random.uniform(-0.3, 0.3)),
+            coefs = [
+                (current_best_coefs[0] + random.uniform(-0.1, 0.1), current_best_coefs[1] + random.uniform(-0.1, 0.1)),
+                (current_best_coefs[0] + random.uniform(-0.2, 0.2), current_best_coefs[1] + random.uniform(-0.2, 0.2)),
+                (second_best_coefs[0] + random.uniform(-0.3, 0.3), second_best_coefs[1] + random.uniform(-0.3, 0.3)),
                 (random.uniform(0, 2), random.uniform(0, 2))
             ]
 
-            f.write("BEST: " + str(best) + "\n")
+            consts = [
+                (current_best_consts[0] + random.uniform(-0.1, 0.1), current_best_consts[1] + random.uniform(-0.1, 0.1)),
+                (current_best_consts[0] + random.uniform(-0.2, 0.2), current_best_consts[1] + random.uniform(-0.2, 0.2)),
+                (second_best_consts[0] + random.uniform(-0.3, 0.3), second_best_consts[1] + random.uniform(-0.3, 0.3)),
+                (random.uniform(0, 2), random.uniform(0, 2))
+            ]
+
+            modifiers = [
+                current_best_modifier + random.uniform(-0.1, 0.1),
+                current_best_modifier + random.uniform(-0.2, 0.2),
+                second_best_modifier + random.uniform(-0.3, 0.3),
+                random.uniform(0, 2)
+            ]
+
             print("BEST:", best)
 
-            f.write("NEW VALUES: " + str(values) + "\n")
-            print("NEW VALUES: " + str(values) + "\n")
+            print("NEW COEFS: " + str(coefs) + "\n")
+            print("NEW CONSTS: " + str(consts) + "\n")
+            print("NEW MODS: " + str(modifiers) + "\n")
 
             for i in range(0, 4):
-                test_agents[i] = Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name=i, own_coef=values[i][0], opp_coef=values[i][1]), i)
-
-            f.close()
+                test_agents[i] = Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name=i, own_coef=coefs[i][0],
+                                                    opp_coef=coefs[i][1], own_const=consts[i][0], opp_const=consts[i][1], modifier=modifiers[i]), i)
 
     else:
         f = open('datafile', 'a')

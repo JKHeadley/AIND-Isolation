@@ -389,6 +389,26 @@ def custom_score14(game, player):
     return own_value - opp_value
 
 
+def custom_score15(game, player):
+    """
+    A heuristic that changes with move_count (alternative).
+    """
+    if game.is_loser(player):
+        return float("-inf")
+
+    if game.is_winner(player):
+        return float("inf")
+
+    own_moves = len(game.get_legal_moves(player))
+    opp_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    own_coef = float((game.move_count / (player.own_coef * player.modifier)) + player.own_const)
+
+    opp_coef = float((game.move_count / (player.opp_coef * player.modifier)) + player.opp_const)
+
+    return own_coef * own_moves - opp_coef * opp_moves
+
+
 class CustomPlayer:
     """Game-playing agent that chooses a move using your evaluation function
     and a depth-limited minimax algorithm with alpha-beta pruning. You must
@@ -419,8 +439,8 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=custom_score,
-                 iterative=True, method='minimax', timeout=110., name="", own_coef=1, opp_coef=1, dynamic=True):
+    def __init__(self, search_depth=3, score_fn=custom_score, iterative=True, method='minimax', timeout=110., name="",
+                 own_coef=1, opp_coef=1, own_const=1, opp_const=1, modifier=1, dynamic=True):
         self.search_depth = search_depth
         self.iterative = iterative
         self.score = score_fn
@@ -437,6 +457,9 @@ class CustomPlayer:
         self.last_opponent_location = ()
         self.own_coef = own_coef
         self.opp_coef = opp_coef
+        self.own_const = own_const
+        self.opp_const = opp_const
+        self.modifier = modifier
 
         self.depth_at_move = dict()
 
