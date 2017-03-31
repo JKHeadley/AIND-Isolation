@@ -103,10 +103,10 @@ def play_match(player1, player2):
     # games = [Board(player2, player1), Board(player2, player1)]
 
     # initialize both games with a random move and response
-    for _ in range(2):
-        move = random.choice(games[0].get_legal_moves())
-        games[0].apply_move(move)
-        games[1].apply_move(move)
+    # for _ in range(2):
+    #     move = random.choice(games[0].get_legal_moves())
+    #     games[0].apply_move(move)
+    #     games[1].apply_move(move)
 
     # play both games and tally the results
     for game in games:
@@ -321,11 +321,15 @@ def main():
     #                Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   "),
     #                Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   ")]
 
+    # test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "0   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=1.5618571223729099, opp_coef=0.8217416162055202), "1   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.511722601561318, opp_coef=0.8796045168998665), "2   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.1006980138853246, opp_coef=0.9458528727213513), "3   "),
+    #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=1.1365094743620907, opp_coef=0.9571847560010487), "4   ")]
+
+
     test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "0   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=1.5618571223729099, opp_coef=0.8217416162055202), "1   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.511722601561318, opp_coef=0.8796045168998665), "2   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.1006980138853246, opp_coef=0.9458528727213513), "3   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=1.1365094743620907, opp_coef=0.9571847560010487), "4   ")]
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=1.1006980138853246, opp_coef=0.9458528727213513), "3   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
@@ -451,8 +455,8 @@ def main():
             # agents = human_agent + [agentUT]
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
-            # agents = best_agents + [agentUT]
-            agents = test_agents + [agentUT]
+            agents = best_agents + [agentUT]
+            # agents = test_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
             f.write("\n\nResults:\n")
