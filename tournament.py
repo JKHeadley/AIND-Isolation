@@ -415,7 +415,7 @@ def main():
 
             current_best = best[-1]
 
-            if local_best[1] > current_best[1]:
+            if local_best[-1] > current_best[-1]:
                 print("FOUND BETTER: " + str(local_best) + "\n")
                 best.append(local_best)
 
