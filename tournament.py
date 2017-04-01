@@ -441,10 +441,10 @@ def main():
             ]
 
             modifiers = [
-                current_best_modifier + random.uniform(-0.1, 0.1),
-                current_best_modifier + random.uniform(-0.2, 0.2),
-                second_best_modifier + random.uniform(-0.3, 0.3),
-                random.uniform(0, 2)
+                current_best_modifier + random.uniform(-5, 5),
+                current_best_modifier + random.uniform(-10, 10),
+                second_best_modifier + random.uniform(-15, 15),
+                random.uniform(0, 3.5) * 10
             ]
 
             print("BEST:", best)
