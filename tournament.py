@@ -54,7 +54,7 @@ from game_agent import custom_score13
 from game_agent import custom_score14
 from game_agent import custom_score15
 
-NUM_MATCHES = 50  # number of matches against each opponent
+NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
 GENETIC = True
 
@@ -297,6 +297,7 @@ def main():
     best_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
                    Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
                    Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
                    Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
@@ -354,25 +355,46 @@ def main():
     # test_agents = [Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved"), "ID_Improved")]
 
     if GENETIC:
+        # initial_coef = [
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2))
+        # ]
+        #
+        # initial_const = [
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2))
+        # ]
+        #
+        # initial_modifier = [
+        #     random.uniform(0, 3.5) * 10,
+        #     random.uniform(0, 3.5) * 10,
+        #     random.uniform(0, 3.5) * 10,
+        #     random.uniform(0, 3.5) * 10,
+        # ]
+
         initial_coef = [
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2))
+            (1.0, 1.8),
+            (0.4, 1.7),
+            (0.39028435408560014, 1.6500267921210408),
+            (0.40824903981871197, 1.2921657974552068)
         ]
 
         initial_const = [
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2)),
-            (random.uniform(0, 2), random.uniform(0, 2))
+            (0.3, 0.65),
+            (0.3, 0.5),
+            (0.4409356902471761, 0.4769695014241872),
+            (0.9270522605215425, 0.769269982864594)
         ]
 
         initial_modifier = [
-            random.uniform(0, 3.5) * 10,
-            random.uniform(0, 3.5) * 10,
-            random.uniform(0, 3.5) * 10,
-            random.uniform(0, 3.5) * 10,
+            40,
+            40,
+            4.757091027264442,
+            0.7911139015621447,
         ]
 
         best = [((0, 0), (0, 0), 0, 0)]
