@@ -54,9 +54,9 @@ from game_agent import custom_score13
 from game_agent import custom_score14
 from game_agent import custom_score15
 
-NUM_MATCHES = 100  # number of matches against each opponent
+NUM_MATCHES = 200  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = True
+GENETIC = False
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -298,7 +298,7 @@ def main():
                    Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
                    Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
                    Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
-                   Agent(CustomPlayer(score_fn=custom_score14, **CUSTOM_ARGS, name="Student14", own_coef=0.8483477579717855, opp_coef=0.6863555382980071), "Student14   ")]
+                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="Student15", own_coef=0.8483477579717855, opp_coef=0.6863555382980071, own_const=1, opp_const=1, modifier=1), "Student15   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
 
@@ -321,10 +321,18 @@ def main():
     #                Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="4", own_coef=1.1365094743620907, opp_coef=0.9571847560010487), "4   ")]
 
 
-    test_agents = [Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="0", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "0   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="1", own_coef=1.0, opp_coef=1.0), "1   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="2", own_coef=1.0, opp_coef=2.0), "2   "),
-                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="3", own_coef=2.0, opp_coef=1.0), "3   ")]
+    test_agents = [Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="0",
+                                      own_coef=0.40824903981871197, opp_coef=1.2921657974552068, own_const=0.9270522605215425,
+                                      opp_const=0.769269982864594, modifier=0.7911139015621447), "0   "),
+                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="1",
+                                      own_coef=1.0, opp_coef=1.8, own_const=0.3,
+                                      opp_const=0.65, modifier=40), "1   "),
+                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="2",
+                                      own_coef=0.4, opp_coef=1.7, own_const=0.3,
+                                      opp_const=0.5, modifier=40), "2   "),
+                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="3",
+                                      own_coef=0.39028435408560014, opp_coef=1.6500267921210408, own_const=0.4409356902471761,
+                                      opp_const=0.4769695014241872, modifier=4.757091027264442), "3   ")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
@@ -480,14 +488,9 @@ def main():
                                                     opp_coef=coefs[i][1], own_const=consts[i][0], opp_const=consts[i][1], modifier=modifiers[i]), i)
 
     else:
-        f = open('datafile', 'a')
 
         print(DESCRIPTION)
         for agentUT in test_agents:
-            f.write("\n")
-            f.write("*************************\n")
-            f.write("{:^25}".format("Evaluating: " + agentUT.name + "\n"))
-            f.write("*************************\n")
             print("")
             print("*************************")
             print("{:^25}".format("Evaluating: " + agentUT.name))
@@ -501,13 +504,10 @@ def main():
             # agents = human_agent + [agentUT]
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
-            agents = best_agents + [agentUT]
-            # agents = test_agents + [agentUT]
+            # agents = best_agents + [agentUT]
+            agents = test_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
-            f.write("\n\nResults:\n")
-            f.write("----------\n")
-            f.write("{!s:<15}{:>10.2f}%\n".format(agentUT.name, win_ratio))
             print("\n\nResults:")
             print("----------")
             print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
@@ -518,19 +518,15 @@ def main():
             for k, v in avg_depth_at_move[agent.player.name].items():
                 v = round(v, 2)
                 avg_depth_at_move[agent.player.name][k] = v
-            f.write(
-                "AVG DEPT PER MOVE FOR " + agent.name + " " + str(avg_depth_at_move[agent.player.name].values()) + "\n")
-            print("AVG DEPT PER MOVE FOR ", agent.name, avg_depth_at_move[agent.player.name].values())
 
             count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
                                                       reverse=False)
-            f.write("COUNTS REACHED FOR " + agent.name + " " + str(count_reached[agent.player.name]) + "\n")
+
             print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
 
         for agent in test_agents:
             if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
                 print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
 
-        f.close()
 if __name__ == "__main__":
     main()
