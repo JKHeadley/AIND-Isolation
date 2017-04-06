@@ -711,7 +711,7 @@ class CustomPlayer:
             else:
                 return float("inf"), (-1, -1)
 
-    def alphabeta_original(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, first=True):
+    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, first=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 
@@ -809,7 +809,7 @@ class CustomPlayer:
             else:
                 return float("inf"), (-1, -1)
 
-    def alphabeta(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, first=True):
+    def alphabeta_alt(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, first=True):
         """Implement minimax search with alpha-beta pruning as described in the
         lectures.
 

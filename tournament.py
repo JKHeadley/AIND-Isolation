@@ -298,7 +298,7 @@ def main():
                    Agent(CustomPlayer(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
                    Agent(CustomPlayer(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
                    Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
-                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="Student15", own_coef=0.8483477579717855, opp_coef=0.6863555382980071, own_const=1, opp_const=1, modifier=1), "Student15   ")]
+                   Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="Student15", own_coef=0.4, opp_coef=1.7, own_const=0.3, opp_const=0.5, modifier=40), "Student15   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
 
@@ -325,14 +325,17 @@ def main():
                                       own_coef=0.40824903981871197, opp_coef=1.2921657974552068, own_const=0.9270522605215425,
                                       opp_const=0.769269982864594, modifier=0.7911139015621447), "0   "),
                    Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="1",
-                                      own_coef=1.0, opp_coef=1.8, own_const=0.3,
-                                      opp_const=0.65, modifier=40), "1   "),
+                                      own_coef=0.2976998517515441, opp_coef=1.250253910231175, own_const=0.8250607486587664,
+                                      opp_const=0.5600653148492951, modifier=3.3305276804450803), "1   "),
                    Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="2",
                                       own_coef=0.4, opp_coef=1.7, own_const=0.3,
                                       opp_const=0.5, modifier=40), "2   "),
                    Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="3",
-                                      own_coef=0.39028435408560014, opp_coef=1.6500267921210408, own_const=0.4409356902471761,
-                                      opp_const=0.4769695014241872, modifier=4.757091027264442), "3   ")]
+                                      own_coef=0.3836093069943273, opp_coef=1.670986455603354, own_const=0.4119804799541043,
+                                      opp_const=0.4082710886813662, modifier=3.6990685942381485), "3   "),
+                   Agent(CustomPlayer(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
+                   Agent(CustomPlayer(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"),
+                         "ID_Improved_Optimized")]
 
     # test_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS_MM, name="ID_Improved_MM"), "ID_Improved_MM"),
     #                Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_AB"), "ID_Improved_AB"),
@@ -504,8 +507,8 @@ def main():
             # agents = human_agent + [agentUT]
             # agents = [Agent(CustomPlayerOpponent(score_fn=custom_score, **CUSTOM_ARGS), "Opponent")] + [agentUT]
             # agents = [Agent(CustomPlayer(score_fn=custom_score, **CUSTOM_ARGS, name="Opponent"), "Opponent")] + [agentUT]
-            # agents = best_agents + [agentUT]
-            agents = test_agents + [agentUT]
+            agents = best_agents + [agentUT]
+            # agents = test_agents + [agentUT]
             win_ratio = play_round(agents, NUM_MATCHES)
 
             print("\n\nResults:")
