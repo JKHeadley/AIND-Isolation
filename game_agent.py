@@ -439,31 +439,23 @@ class CustomPlayer:
         timer expires.
     """
 
-    def __init__(self, search_depth=3, score_fn=custom_score, iterative=True, method='minimax', timeout=110., name="",
-                 own_coef=1, opp_coef=1, own_const=1, opp_const=1, modifier=1, dynamic=True):
-        self.search_depth = search_depth
-        self.iterative = iterative
-        self.score = score_fn
-        self.method = method
+    def __init____init__(self, data=None, timeout=1.):
+        self.iterative = True
+        self.score = custom_score15
         self.time_left = None
         self.TIMER_THRESHOLD = timeout
         self.isOpponent = False
         self.ab_trees = dict()
         self.move_count = 0
-        self.name = name
         self.reflect = False
-        self.dynamic = dynamic
+        self.dynamic = True
         self.center = ()
         self.last_opponent_location = ()
-        self.own_coef = own_coef
-        self.opp_coef = opp_coef
-        self.own_const = own_const
-        self.opp_const = opp_const
-        self.modifier = modifier
-
-        self.depth_at_move = dict()
-
-        self.branching_factor = dict()
+        self.own_coef = 1
+        self.opp_coef = 1
+        self.own_const = 1
+        self.opp_const = 1
+        self.modifier = 1
 
     def get_best_second_move(self, game):
         move = tuple(map(lambda x, y: x - y, self.center, (0, 1)))
@@ -500,7 +492,7 @@ class CustomPlayer:
 
     def get_opening_move(self, game):
         move = (-1, -1)
-        self.center = (int(game.width / 2), int(game.height / 2))
+        self.center = (3, 3)
         if game.move_count == 0:
             move = self.center
             self.reflect = False
@@ -519,7 +511,7 @@ class CustomPlayer:
         else:
             return None
 
-    def get_move(self, game, legal_moves, time_left):
+    def get_move(self, game, time_left):
         """Search for the best move from the available legal moves and return a
         result before the time limit expires.
 
@@ -559,8 +551,6 @@ class CustomPlayer:
 
         value = {}
         move = {}
-        last_depth = False
-        lookout = False
 
         self.ab_trees = dict()
 
@@ -580,57 +570,34 @@ class CustomPlayer:
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
             elif self.reflect:
                 move = self.get_reflect_move(game)
-                # print("REFLECTING", move, game.get_legal_moves(), move in game.get_legal_moves(self))
-                # new_game = game.forecast_move(move)
-                # print(new_game.to_string())
                 if not move in game.get_legal_moves(self) and len(game.get_legal_moves()) > 0:
                     self.reflect = False
                     move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
-                    print("REFLECTION FAILED:", move, game.get_legal_moves(), move in game.get_legal_moves(self))
-                    print(game.to_string())
 
-            elif self.iterative:
+            else:
                 for depth in range(1, 100):
-                    last_depth = depth
                     # After ~move 28, the average branching factor is 2 and AB pruning isn't effective
                     if self.dynamic:
                         if game.move_count < 28:
-                            value, move = getattr(self, self.method)(game, depth)
+                            value, move = self.alphabeta(game, depth)
                         else:
                             value, move = self.minimax(game, depth)
                     else:
-                        value, move = getattr(self, self.method)(game, depth)
+                        value, move = self.alphabeta(game, depth)
                     # The following if statements end iterative deepening early based on the prediction of a win or loss
                     if value == float("-inf") and depth > 50:
                         break
                     if value == float("inf"):
                         break
-            else:
-                value, move = getattr(self, self.method)(game, self.search_depth)
 
         except Timeout:
             # Handle any actions required at timeout, if necessary
             pass
 
         # Return the best move from the last completed search iteration
-        # if self.iterative and last_depth > 12:
-            # print("STUDENT MOVE", move)
-            # print("STUDENT VALUE", value)
-            # print("STUDENT MOVES", game.move_count)
-            # print("LAST DEPTH: ", last_depth)
-            # print(game.to_string())
-        # else:
-        #     print("OPPONENT MOVE", move)
-        #     print("OPPONENT VALUE", value)
-        #     print("OPPONENT DEPTH", last_depth)
-        # print("STUDENT MOVE", move, value)
-        if self.iterative and last_depth:
-            self.depth_at_move[game.move_count] = last_depth
-
-        self.move_count += 1
         return move
 
-    def minimax(self, game, depth, maximizing_player=True, first=True):
+    def minimax(self, game, depth, maximizing_player=True):
         """Implement the minimax search algorithm as described in the lectures.
 
         Parameters
@@ -666,10 +633,6 @@ class CustomPlayer:
 
         if depth == 0:
             value = self.score(game, self), game.get_player_location(game.active_player)
-            # if game.active_player.iterative:
-            #     print("END VALUE OPPONENT: ", value)
-            # else:
-            #     print("END VALUE STUDENT: ", value)
             return value
 
         moves = dict()
@@ -677,36 +640,20 @@ class CustomPlayer:
         if maximizing_player:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                # print(new_game.visited)
-                # print(new_game.counter)
-                moves[move], _ = self.minimax(new_game, depth - 1, False, False)
-                # if first:
-                #     print(new_game.to_string())
-                #     print(depth, move, moves[move])
+                moves[move], _ = self.minimax(new_game, depth - 1, False)
 
             if len(moves) > 0:
                 value = max(moves, key=moves.get)
-                # if first:
-                #     print(moves)
-                #     print(value)
                 return moves[value], value
             else:
                 return float("-inf"), (-1, -1)
         else:
             for move in game.get_legal_moves():
                 new_game = game.forecast_move(move)
-                # print(new_game.visited)
-                # print(new_game.counter)
-                moves[move], _ = self.minimax(new_game, depth - 1, True, False)
-                # if first:
-                #     print(new_game.to_string())
-                #     print(depth, move, moves[move])
+                moves[move], _ = self.minimax(new_game, depth - 1, True)
 
             if len(moves) > 0:
                 value = min(moves, key=moves.get)
-                # if first:
-                #     print(moves)
-                #     print(value)
                 return moves[value], value
             else:
                 return float("inf"), (-1, -1)
@@ -773,8 +720,6 @@ class CustomPlayer:
                 new_game = game.forecast_move(move)
                 v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, False)
                 moves[move] = v
-                # print(new_game.to_string())
-                # print(depth, move, moves[move])
                 if v >= beta:
                     return v, move
                 alpha = max([alpha, v])
@@ -793,8 +738,6 @@ class CustomPlayer:
                 new_game = game.forecast_move(move)
                 v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, True)
                 moves[move] = v
-                # print(new_game.to_string())
-                # print(depth, move, moves[move])
                 if v <= alpha:
                     return v, move
                 beta = min([beta, v])
@@ -808,97 +751,6 @@ class CustomPlayer:
                 return moves[value], value
             else:
                 return float("inf"), (-1, -1)
-
-    def alphabeta_alt(self, game, depth, alpha=float("-inf"), beta=float("inf"), maximizing_player=True, first=True):
-        """Implement minimax search with alpha-beta pruning as described in the
-        lectures.
-
-        Parameters
-        ----------
-        game : isolation.Board
-            An instance of the Isolation game `Board` class representing the
-            current game state
-
-        depth : int
-            Depth is an integer representing the maximum number of plies to
-            search in the game tree before aborting
-
-        alpha : float
-            Alpha limits the lower bound of search on minimizing layers
-
-        beta : float
-            Beta limits the upper bound of search on maximizing layers
-
-        maximizing_player : bool
-            Flag indicating whether the current search depth corresponds to a
-            maximizing layer (True) or a minimizing layer (False)
-
-        Returns
-        -------
-        float
-            The score for the current search branch
-
-        tuple(int, int)
-            The best move for the current branch; (-1, -1) for no legal moves
-
-        Notes
-        -----
-            (1) You MUST use the `self.score()` method for board evaluation
-                to pass the project unit tests; you cannot call any other
-                evaluation function directly.
-        """
-        if self.time_left() < self.TIMER_THRESHOLD:
-            raise Timeout()
-
-        current_location = game.get_player_location(game.active_player)
-
-        if depth == 0:
-            return self.score(game, self), current_location
-
-        moves = dict()
-
-        # Empirical data shows that after around move 18, optimal ordering of branches is not worth the effort (gives worse results)
-        if game.move_count < 18:
-            if current_location in self.ab_trees:
-                legal_moves = (k[0] for k in self.ab_trees[current_location])
-            else:
-                legal_moves = game.get_legal_moves()
-        else:
-            legal_moves = game.get_legal_moves()
-
-        if maximizing_player:
-            v_move = (float("-inf"), (-1, -1))
-            for move in legal_moves:
-                new_game = game.forecast_move(move)
-                v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, False)
-                moves[move] = v
-                v_move = max([v_move, (v, move)], key=itemgetter(0))
-                alpha = max([alpha, v_move[0]])
-                if beta <= alpha:
-                    break
-
-            if game.move_count < 18:
-                self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
-                                                     reverse=True)
-
-            return v_move
-
-        else:
-            v_move = (float("inf"), (-1, -1))
-            for move in legal_moves:
-                new_game = game.forecast_move(move)
-                v, _ = self.alphabeta(new_game, depth - 1, alpha, beta, True)
-                moves[move] = v
-                v_move = min([v_move, (v, move)], key=itemgetter(0))
-                beta = min([beta, v_move[0]])
-                if beta <= alpha:
-                    break
-
-            if game.move_count < 18:
-                self.ab_trees[current_location] = sorted(moves.items(), key=lambda x: x[1],
-                                                     reverse=False)
-
-            return v_move
 
 
 class CustomPlayerOpponent:
