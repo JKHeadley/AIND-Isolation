@@ -350,11 +350,11 @@ class CustomPlayer:
         self.dynamic = True
         self.center = ()
         self.last_opponent_location = ()
-        self.own_coef = 1
-        self.opp_coef = 1
-        self.own_const = 1
-        self.opp_const = 1
-        self.modifier = 1
+        self.own_coef = 0.4
+        self.opp_coef = 1.7
+        self.own_const = 0.3
+        self.opp_const = 0.5
+        self.modifier = 40
 
     def get_best_second_move(self, game):
         move = (2, 2)
