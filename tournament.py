@@ -153,15 +153,15 @@ def play_match(player1, player2):
 
         # print(branching_factor)
 
-        if player1.name in match_count:
-            match_count[player1.name] += 1
-        else:
-            match_count[player1.name] = 1
-
-        if player2.name in match_count:
-            match_count[player2.name] += 1
-        else:
-            match_count[player2.name] = 1
+        # if player1.name in match_count:
+        #     match_count[player1.name] += 1
+        # else:
+        #     match_count[player1.name] = 1
+        #
+        # if player2.name in match_count:
+        #     match_count[player2.name] += 1
+        # else:
+        #     match_count[player2.name] = 1
 
         # if player1 in avg_time:
         #     avg_time[player1] = game.time_left[player1] + avg_time[player1]
@@ -184,38 +184,38 @@ def play_match(player1, player2):
         #     avg_depth_at_move[player2.name] = player2.depth_at_move
 
         # When calculating avg_depth, we only take into account games that were won, since losses can result in irrelevant deep searches
-        if winner.name in avg_depth_at_move:
-            avg_depth_at_move[winner.name] = {
-            k: winner.depth_at_move.get(k, 0) + avg_depth_at_move[winner.name].get(k, 0) for k in
-            set(winner.depth_at_move) | set(avg_depth_at_move[winner.name])}
-        else:
-            avg_depth_at_move[winner.name] = winner.depth_at_move
-
-        if winner.name in win_count:
-            win_count[winner.name] += 1
-        else:
-            win_count[winner.name] = 1
-
-        if winner.name in count_reached:
-            for i in range(0, len(winner.depth_at_move) + 1):
-                if i in count_reached[winner.name]:
-                    count_reached[winner.name][i] += 1
-                else:
-                    count_reached[winner.name][i] = 1
-        else:
-            for i in range(0, len(winner.depth_at_move) + 1):
-                count_reached[winner.name] = dict()
-                count_reached[winner.name][i] = 1
+        # if winner.name in avg_depth_at_move:
+        #     avg_depth_at_move[winner.name] = {
+        #     k: winner.depth_at_move.get(k, 0) + avg_depth_at_move[winner.name].get(k, 0) for k in
+        #     set(winner.depth_at_move) | set(avg_depth_at_move[winner.name])}
+        # else:
+        #     avg_depth_at_move[winner.name] = winner.depth_at_move
+        #
+        # if winner.name in win_count:
+        #     win_count[winner.name] += 1
+        # else:
+        #     win_count[winner.name] = 1
+        #
+        # if winner.name in count_reached:
+        #     for i in range(0, len(winner.depth_at_move) + 1):
+        #         if i in count_reached[winner.name]:
+        #             count_reached[winner.name][i] += 1
+        #         else:
+        #             count_reached[winner.name][i] = 1
+        # else:
+        #     for i in range(0, len(winner.depth_at_move) + 1):
+        #         count_reached[winner.name] = dict()
+        #         count_reached[winner.name][i] = 1
             
         # print(game.to_string())
         # print("WINNER: ", winner.name)
         # if winner.name != "Student":
         #     print(game.to_string())
-        if winner.name == "Student" or winner.name == "Student2" or winner.name == "Student3" or winner.name == "Student4" and winner.reflect:
-            if winner.name in reflection_wins:
-                reflection_wins[winner.name] += 1
-            else:
-                reflection_wins[winner.name] = 1
+        # if winner.name == "Student" or winner.name == "Student2" or winner.name == "Student3" or winner.name == "Student4" and winner.reflect:
+        #     if winner.name in reflection_wins:
+        #         reflection_wins[winner.name] += 1
+        #     else:
+        #         reflection_wins[winner.name] = 1
 
     if sum(num_timeouts.values()) != 0:
         warnings.warn(TIMEOUT_WARNING)
@@ -292,9 +292,7 @@ def main():
 
     best_agents = [Agent(CustomPlayerOpponent(score_fn=improved_score, **CUSTOM_ARGS, name="ID_Improved_Optimized"), "ID_Improved_Optimized"),
                    Agent(CustomPlayerOpponent(score_fn=custom_score3, **CUSTOM_ARGS, name="Student3"), "Student3   "),
-                   Agent(CustomPlayerOpponent(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   "),
-                   Agent(CustomPlayerOpponent(score_fn=custom_score12, **CUSTOM_ARGS, name="Student12", own_coef=1.492220782479327, opp_coef=0.7729218598739231), "Student12   "),
-                   Agent(CustomPlayerOpponent(score_fn=custom_score15, **CUSTOM_ARGS, name="Student15", own_coef=0.4, opp_coef=1.7, own_const=0.3, opp_const=0.5, modifier=40), "Student15   ")]
+                   Agent(CustomPlayerOpponent(score_fn=custom_score8, **CUSTOM_ARGS, name="Student8"), "Student8   ")]
 
     human_agent = [Agent(HumanPlayer(), "Human")]
 
@@ -511,21 +509,21 @@ def main():
             print("----------")
             print("{!s:<15}{:>10.2f}%".format(agentUT.name, win_ratio))
 
-        for agent in test_agents:
-            avg_depth_at_move[agent.player.name] = {k: v / win_count[agent.player.name] for k, v in
-                                                    avg_depth_at_move[agent.player.name].items()}
-            for k, v in avg_depth_at_move[agent.player.name].items():
-                v = round(v, 2)
-                avg_depth_at_move[agent.player.name][k] = v
-
-            count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
-                                                      reverse=False)
-
-            print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
-
-        for agent in test_agents:
-            if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
-                print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
+        # for agent in test_agents:
+        #     avg_depth_at_move[agent.player.name] = {k: v / win_count[agent.player.name] for k, v in
+        #                                             avg_depth_at_move[agent.player.name].items()}
+        #     for k, v in avg_depth_at_move[agent.player.name].items():
+        #         v = round(v, 2)
+        #         avg_depth_at_move[agent.player.name][k] = v
+        #
+        #     count_reached[agent.player.name] = sorted(count_reached[agent.player.name].items(), key=lambda x: x[0],
+        #                                               reverse=False)
+        #
+        #     print("COUNTS REACHED FOR ", agent.name, count_reached[agent.player.name])
+        #
+        # for agent in test_agents:
+        #     if agent.player.name == "Student" or agent.player.name == "Student2" or agent.player.name == "Student3" or agent.player.name == "Student4":
+        #         print("REFLECTION WINS:", agent.name, reflection_wins[agent.player.name])
 
 if __name__ == "__main__":
     main()
