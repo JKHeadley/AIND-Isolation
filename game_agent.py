@@ -7,7 +7,7 @@ You must test your agent's strength against a set of agents with known
 relative strength using tournament.py and include the results in your report.
 """
 
-from random import randint
+import random
 import numpy
 
 
@@ -466,12 +466,12 @@ class CustomPlayer:
             if game.move_count < 3:
                 move = self.get_opening_move(game)
                 if not move:
-                    move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
+                    move = game.get_legal_moves()[random.randint(0, len(game.get_legal_moves()) - 1)]
             elif self.reflect:
                 move = self.get_reflect_move(game)
                 if not move in game.get_legal_moves(self) and len(game.get_legal_moves()) > 0:
                     self.reflect = False
-                    move = game.get_legal_moves()[randint(0, len(game.get_legal_moves()) - 1)]
+                    move = game.get_legal_moves()[random.randint(0, len(game.get_legal_moves()) - 1)]
 
             else:
                 for depth in range(1, 100):
@@ -750,9 +750,9 @@ class CustomPlayerOpponent:
             # when the timer gets close to expiring
 
             if game.move_count == 0:
-                return game.get_legal_moves(self)[randint(0, len(game.get_legal_moves(self)) - 1)]
+                return game.get_legal_moves(self)[random.randint(0, len(game.get_legal_moves(self)) - 1)]
             elif game.move_count == 1:
-                return game.get_legal_moves(self)[randint(0, len(game.get_legal_moves(self)) - 1)]
+                return game.get_legal_moves(self)[random.randint(0, len(game.get_legal_moves(self)) - 1)]
 
             if self.iterative:
                 for depth in range(1, 100):
