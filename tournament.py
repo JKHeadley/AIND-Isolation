@@ -54,9 +54,9 @@ from game_agent import custom_score13
 from game_agent import custom_score14
 from game_agent import custom_score15
 
-NUM_MATCHES = 200  # number of matches against each opponent
+NUM_MATCHES = 100  # number of matches against each opponent
 TIME_LIMIT = 250  # number of milliseconds before timeout
-GENETIC = False
+GENETIC = True
 
 TIMEOUT_WARNING = "One or more agents lost a match this round due to " + \
                   "timeout. The get_move() function must return before " + \
@@ -383,25 +383,46 @@ def main():
 
     if GENETIC:
         initial_coef = [
-            (0.4, 1.7),
+            (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2))
         ]
 
         initial_const = [
-            (0.3, 0.5),
+            (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2)),
             (random.uniform(0, 2), random.uniform(0, 2))
         ]
 
         initial_modifier = [
-            40,
+            random.uniform(0, 4) * 10,
             random.uniform(0, 4) * 10,
             random.uniform(0, 4) * 10,
             random.uniform(0, 4) * 10,
         ]
+
+        # initial_coef = [
+        #     (0.4, 1.7),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2))
+        # ]
+        #
+        # initial_const = [
+        #     (0.3, 0.5),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2)),
+        #     (random.uniform(0, 2), random.uniform(0, 2))
+        # ]
+        #
+        # initial_modifier = [
+        #     40,
+        #     random.uniform(0, 4) * 10,
+        #     random.uniform(0, 4) * 10,
+        #     random.uniform(0, 4) * 10,
+        # ]
 
         # initial_coef = [
         #     (0.4, 1.7),
