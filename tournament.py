@@ -354,11 +354,8 @@ def main():
 
     test_agents = [
         Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="1",
-                           own_coef=0.11842484857750328, opp_coef=0.7586465860632726, own_const=1.1091848421813992,
-                           opp_const=1.6320687459731003, modifier=37.878011280776505), "1   "),
-        Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="2",
-                           own_coef=1.0146055729530978, opp_coef=0.6498591474462465, own_const=1.8768483463908516,
-                           opp_const=0.35063682041283845, modifier=9.576790235199464), "2   "),
+                           own_coef=1.7044629891425531, opp_coef=1.6490487183260913, own_const=0.7894738206437453,
+                           opp_const=0.4491943511988748, modifier=1.4192648079546637), "1   "),
         Agent(CustomPlayer(score_fn=custom_score15, **CUSTOM_ARGS, name="0",
                            own_coef=0.4, opp_coef=1.7, own_const=0.3,
                            opp_const=0.5, modifier=40), "0   ")
